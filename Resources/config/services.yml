@@ -1,0 +1,7 @@
+parameters:
+#    simbiotica_carto_db.example.class: Simbiotica\CartoDBBundle\Example
+
+services:
+#    simbiotica_carto_db.example:
+#        class: %simbiotica_carto_db.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]
