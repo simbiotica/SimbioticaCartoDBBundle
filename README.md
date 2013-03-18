@@ -52,7 +52,7 @@ Next stop, configuration:
 
 ``` yaml
 # app/config/config.yml
-simbiotica_carto_db:
+simbiotica_cartodb:
     key:
     secret:
     subdomain:

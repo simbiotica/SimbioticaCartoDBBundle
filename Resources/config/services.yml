@@ -1,6 +1,3 @@
-parameters:
-#    simbiotica_carto_db.example.class: Simbiotica\CartoDBBundle\Example
-
 services:
     simbiotica.cartodb.client:
         class: Simbiotica\CartoDBBundle\CartoDB\CartoDBClient

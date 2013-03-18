@@ -19,7 +19,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('simbiotica_carto_db');
+        $rootNode = $treeBuilder->root('simbiotica_cartodb');
 
         $this->parseCredentials($rootNode);
 
