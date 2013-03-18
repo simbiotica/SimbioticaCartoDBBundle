@@ -12,22 +12,33 @@ use Eher\OAuth;
 
 class CartoDBClient
 {
-    protected $session;
-    protected $sessionKey;
+    const SESSION_KEY = "cartodb";
     
+    /**
+     * Session to store token
+     **/
+    protected $session;
+    
+    /**
+     * Necessary data to connect to CartoDB
+     */
     public $key;
     public $secret;
     public $email;
     public $password;
     public $subdomain;
     
+    /**
+     * Internal variables
+     */
     public $authorized = false;
     public $json_decode = true;
-    private $credentials = array();
-    private $OAUTH_URL;
-    private $API_URL;
-
-    private $TEMP_TOKEN_FILE_PATH;
+    
+    /**
+     * Endpoint urls
+     */
+    private $oauthUrl;
+    private $apiUrl;
 
     /**
      * Constructs CartoDB connection and stores token in session
@@ -42,7 +53,6 @@ class CartoDBClient
      */
     function __construct(Session $session, $key, $secret, $subdomain, $email, $password)
     {
-        $this->sessionKey = "cartodb";
         $this->session = $session;
         
         $this->key = $key;
@@ -51,8 +61,8 @@ class CartoDBClient
         $this->email = $email;
         $this->password = $password;
 
-        $this->OAUTH_URL = sprintf('https://%s.cartodb.com/oauth/', $this->subdomain);
-        $this->API_URL = sprintf('https://%s.cartodb.com/api/v1/', $this->subdomain);
+        $this->oauthUrl = sprintf('https://%s.cartodb.com/oauth/', $this->subdomain);
+        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v2/', $this->subdomain);
 
         $this->authorized = $this->getAccessToken();
     }
@@ -68,14 +78,13 @@ class CartoDBClient
 
     private function request($uri, $method = 'GET', $args = array())
     {
-        $url = $this->API_URL . $uri;
+        $url = $this->apiUrl . $uri;
         $sig_method = new HmacSha1();
         $consumer = new Consumer($this->key, $this->secret, NULL);
-        $token = new Token($this->credentials['oauth_token'],
-                $this->credentials['oauth_token_secret']);
+        $token = $this->getToken();
 
-        $acc_req = OAuthRequest::from_consumer_and_token($consumer, $token,
-                $method, $url, $args['params']);
+        $acc_req = Request::from_consumer_and_token($consumer, $token,
+                $method, $url, isset($args['params'])?$args['params']:array());
         if (!isset($args['headers']['Accept'])) {
             $args['headers']['Accept'] = 'application/json';
         }
@@ -98,25 +107,26 @@ class CartoDBClient
         curl_close($ch);
 
         if ($response['info']['http_code'] == 401) {
-            $this->authorized = false;
-            $this->credentials = $this->getAccessToken();
+            $this->authorized = $this->getAccessToken();
             return $this->request($uri, $method, $args);
         }
-
-        return $response;
+        
+        $payload = new Payload($acc_req);
+        $payload->setRawResponse($response);
+        return $payload;
     }
 
     public function runSql($sql)
     {
         $params = array('q' => $sql);
-        $response = $this->request('sql', 'POST', array('params' => $params));
+        $payload = $this->request('sql', 'POST', array('params' => $params));
 
-        if ($response['info']['http_code'] != 200) {
-            throw new Exception(
+        if ($payload->getInfo()['http_code'] != 200) {
+            throw new \RuntimeException(
                     'There was a problem with your request: '
-                            . $response['return']);
+                            . implode('<br>', $payload->getRawResponse()['return']['error']));
         }
-        return $response;
+        return $payload;
     }
 
     public function createTable($table, $schema = NULL)
@@ -165,7 +175,9 @@ class CartoDBClient
 
     public function getTables()
     {
-        return $this->request('tables');
+        $sql = "select * from information_schema.tables WHERE table_type='BASE TABLE'";
+                
+        return $this->runSql($sql);
     }
 
     public function getRow($table, $row)
@@ -226,10 +238,10 @@ class CartoDBClient
                 'x_auth_mode' => 'client_auth');
 
         $acc_req = Request::from_consumer_and_token($consumer, NULL,
-                "POST", $this->OAUTH_URL . 'access_token', $params);
+                "POST", $this->oauthUrl . 'access_token', $params);
 
         $acc_req->sign_request($sig_method, $consumer, NULL);
-        $ch = curl_init($this->OAUTH_URL . 'access_token');
+        $ch = curl_init($this->oauthUrl . 'access_token');
         curl_setopt($ch, CURLOPT_POST, True);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $acc_req->to_postdata());
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -244,10 +256,10 @@ class CartoDBClient
         if ($info['http_code'] != 200) {
             throw new \RuntimeException('Authorization failed for this key and secret.');
         }
-        //Success
-        $credentials = $this->parse_query($response, true);
-        #Now that we have the token, lets save it
-        $this->setToken($credentials);
+        //Got the token, now let's store it in session
+        $rawTokenData = $this->parse_query($response, true);
+        $this->setToken(new Token($rawTokenData['oauth_token'],
+                $rawTokenData['oauth_token_secret']));
         return true;
     }
 
@@ -293,13 +305,13 @@ class CartoDBClient
     }
     
     private function getToken() {
-        return $this->session->get($this->sessionKey, null);
+        return unserialize($this->session->get(self::SESSION_KEY, null));
     }
     
-    private function setToken($token) {
+    private function setToken(Token $token) {
         if ($this->session == null)
             throw new \RuntimeException("Need a valid session to store CartoDB auth token");
-        $this->session->set($this->sessionKey, $token);
+        $this->session->set(self::SESSION_KEY, serialize($token));
     }
 }
 

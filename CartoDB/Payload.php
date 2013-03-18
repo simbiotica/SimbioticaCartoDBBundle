@@ -1,0 +1,116 @@
+<?php 
+
+namespace Simbiotica\CartoDBBundle\CartoDB;
+
+class Payload {
+
+    /**
+     * Request data
+     */
+    protected $request;
+    
+    /**
+     * Response metadata
+     */
+    protected $time;
+    protected $rowCount;
+    protected $info;
+    
+    /**
+     * Actual information requested in the query
+     */
+    protected $data;
+    protected $rawResponse;
+
+    function __construct($request)
+    {
+        $this->request = $request;
+    }
+    
+    public function setRawResponse(array $rawResponse)
+    {
+        $this->rawResponse = $rawResponse;
+        $this->time = isset($rawResponse['return']['time'])?$rawResponse['return']['time']:null;
+        $this->rowCount = isset($rawResponse['return']['total_rows'])?$rawResponse['return']['total_rows']:null;
+        $this->info = isset($rawResponse['info'])?$rawResponse['info']:null;
+        $this->data = isset($rawResponse['return']['rows'])?$rawResponse['return']['rows']:array();
+    }
+    
+    function __toString()
+    {
+        $return = $this->info['url'].' - HTTP CODE:'.$this->info['http_code'];
+        if ($this->info['http_code'] == 200)
+        {
+            $return = $return.' - Row count:'.$this->rowCount;
+        }
+        return $return;
+    }
+    
+    public function getRawResponse()
+    {
+        return $this->rawResponse;
+    }
+    
+    public function getTime()
+    {
+        return $this->time;
+    }
+
+    public function setTime($time)
+    {
+        $this->time = $time;
+    }
+
+    public function getRowCount()
+    {
+        return $this->rowCount;
+    }
+
+    public function setRowCount($rowCount)
+    {
+        $this->rowCount = $rowCount;
+    }
+
+    public function getInfo()
+    {
+        return $this->info;
+    }
+
+    public function setInfo($info)
+    {
+        $this->info = $info;
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+
+    function __get($name) {
+        if(is_null($this->data) )
+        {
+            $target = array();
+            return null;
+        }
+        elseif( is_array($this->data) && isset($this->data[$name]))
+        {
+            return $this->data[$name];
+        }
+        return null;
+    }
+    
+    function __set($name, $value) {
+        if(is_null($this->data) )
+        {
+            $this->data = array();
+        }
+        $this->data[$name] = $value;
+    }
+}
+
+?>
