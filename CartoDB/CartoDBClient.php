@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Main connection class. Mostly based on Vizzuality's CartoDB PHP class
+ * https://github.com/Vizzuality/cartodbclient-php
+ * 
+ * @author tiagojsag
+ */
 
 namespace Simbiotica\CartoDBBundle\CartoDB;
 

@@ -9,6 +9,8 @@
         {
             "name": "Tiago Garcia",
             "email": "tiago@simbiotica.es"
+            "homepage": "http://simbiotica.es/en/",
+            "role": "Developer"
         }
     ],
     "require": {
