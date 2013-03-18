@@ -1,0 +1,8 @@
+# Copy this file as cartodb_config.yml and fill in the parameters
+
+simbiotica_carto_db:
+    key:
+    secret:
+    subdomain:
+    email:
+    password:

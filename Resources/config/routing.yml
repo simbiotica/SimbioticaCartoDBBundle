@@ -1,3 +1,0 @@
-simbiotica_carto_db_homepage:
-    pattern:  /hello/{name}
-    defaults: { _controller: SimbioticaCartoDBBundle:Default:index }

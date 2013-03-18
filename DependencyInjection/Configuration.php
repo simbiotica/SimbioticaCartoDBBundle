@@ -2,6 +2,7 @@
 
 namespace Simbiotica\CartoDBBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -20,10 +21,24 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('simbiotica_carto_db');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $this->parseCredentials($rootNode);
 
         return $treeBuilder;
+    }
+
+    /**
+     * @param \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $node
+     */
+    private function parseCredentials(ArrayNodeDefinition $node)
+    {
+        $node
+            ->children()
+                ->scalarNode('key')->isRequired()->end()
+                ->scalarNode('secret')->isRequired()->end()
+                ->scalarNode('email')->isRequired()->end()
+                ->scalarNode('password')->isRequired()->end()
+                ->scalarNode('subdomain')->isRequired()->end()
+            ->end()
+        ;
     }
 }
