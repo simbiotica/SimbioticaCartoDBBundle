@@ -18,11 +18,19 @@ class ConnectionFactory
     }
     
     /**
-     * Create a connection by name.
+     * Create a private connection by name.
      */
-    public function createConnection($key, $secret, $subdomain, $email, $password)
+    public function createPrivateConnection($subdomain, $key, $secret, $email, $password)
     {
-        return new Connection($this->session, $key, $secret, $subdomain, $email, $password);
+        return new PrivateConnection($this->session, $subdomain, $key, $secret, $email, $password);
+    }
+    
+    /**
+     * Create a public connection by name.
+     */
+    public function createPublicConnection($subdomain)
+    {
+        return new PublicConnection($this->session, $subdomain);
     }
 }
 

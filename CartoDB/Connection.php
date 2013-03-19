@@ -16,7 +16,7 @@ use Eher\OAuth\Token;
 use Eher\OAuth\HmacSha1;
 use Eher\OAuth;
 
-class Connection
+abstract class Connection
 {
     const SESSION_KEY = "cartodb";
     
@@ -28,11 +28,11 @@ class Connection
     /**
      * Necessary data to connect to CartoDB
      */
-    public $key;
-    public $secret;
-    public $email;
-    public $password;
-    public $subdomain;
+    protected $key;
+    protected $secret;
+    protected $email;
+    protected $password;
+    protected $subdomain;
     
     /**
      * Internal variables
@@ -43,36 +43,9 @@ class Connection
     /**
      * Endpoint urls
      */
-    private $oauthUrl;
-    private $apiUrl;
+    protected $oauthUrl;
+    protected $apiUrl;
 
-    /**
-     * Constructs CartoDB connection and stores token in session
-     * @throws RuntimeException on connection or auth failure
-     * 
-     * @param Session $session
-     * @param unknown $key
-     * @param unknown $secret
-     * @param unknown $subdomain
-     * @param unknown $email
-     * @param unknown $password
-     */
-    function __construct(Session $session, $key, $secret, $subdomain, $email, $password)
-    {
-        $this->session = $session;
-        
-        $this->key = $key;
-        $this->secret = $secret;
-        $this->subdomain = $subdomain;
-        $this->email = $email;
-        $this->password = $password;
-
-        $this->oauthUrl = sprintf('https://%s.cartodb.com/oauth/', $this->subdomain);
-        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v2/', $this->subdomain);
-
-        $this->authorized = $this->getAccessToken();
-    }
-    
     public function setSession(Session $session) {
         $this->session = $session;
     }
@@ -80,46 +53,6 @@ class Connection
     function __toString()
     {
         return "OAuthConsumer[key=$this->key, secret=$this->secret]";
-    }
-
-    private function request($uri, $method = 'GET', $args = array())
-    {
-        $url = $this->apiUrl . $uri;
-        $sig_method = new HmacSha1();
-        $consumer = new Consumer($this->key, $this->secret, NULL);
-        $token = $this->getToken();
-
-        $acc_req = Request::from_consumer_and_token($consumer, $token,
-                $method, $url, isset($args['params'])?$args['params']:array());
-        if (!isset($args['headers']['Accept'])) {
-            $args['headers']['Accept'] = 'application/json';
-        }
-
-        $acc_req->sign_request($sig_method, $consumer, $token);
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $acc_req->to_postdata());
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $args['headers']);
-
-        $response = array();
-        $response['return'] = ($this->json_decode) ? (array) json_decode(
-                        curl_exec($ch)) : curl_exec($ch);
-        $response['info'] = curl_getinfo($ch);
-
-        curl_close($ch);
-
-        if ($response['info']['http_code'] == 401) {
-            $this->authorized = $this->getAccessToken();
-            return $this->request($uri, $method, $args);
-        }
-        
-        $payload = new Payload($acc_req);
-        $payload->setRawResponse($response);
-        return $payload;
     }
 
     public function runSql($sql)
@@ -130,7 +63,7 @@ class Connection
         if ($payload->getInfo()['http_code'] != 200) {
             throw new \RuntimeException(
                     'There was a problem with your request: '
-                            . implode('<br>', $payload->getRawResponse()['return']['error']));
+                            . implode('<br>', $payload->getRawResponse()['return']));
         }
         return $payload;
     }
@@ -179,9 +112,10 @@ class Connection
                         array('params' => $params));
     }
 
-    public function getTables()
+    public function getTableNames()
     {
-        $sql = "select * from information_schema.tables WHERE table_type='BASE TABLE'";
+//         $sql = "select * from information_schema.tables WHERE table_type='BASE TABLE'";
+        $sql = "SELECT \"pg_class\".\"oid\", \"pg_class\".\"relname\" FROM \"pg_class\" INNER JOIN \"pg_namespace\" ON (\"pg_namespace\".\"oid\" = \"pg_class\".\"relnamespace\") WHERE ((\"relkind\" = 'r') AND (\"nspname\" = 'public') AND (\"relname\" NOT IN ('spatial_ref_sys', 'geography_columns', 'geometry_columns', 'raster_columns', 'raster_overviews', 'cdb_tablemetadata')))";
                 
         return $this->runSql($sql);
     }
@@ -234,42 +168,7 @@ class Connection
                         array('params' => $params));
     }
 
-    private function getAccessToken()
-    {
-        $sig_method = new HmacSha1();
-        $consumer = new Consumer($this->key, $this->secret, NULL);
-
-        $params = array('x_auth_username' => $this->email,
-                'x_auth_password' => $this->password,
-                'x_auth_mode' => 'client_auth');
-
-        $acc_req = Request::from_consumer_and_token($consumer, NULL,
-                "POST", $this->oauthUrl . 'access_token', $params);
-
-        $acc_req->sign_request($sig_method, $consumer, NULL);
-        $ch = curl_init($this->oauthUrl . 'access_token');
-        curl_setopt($ch, CURLOPT_POST, True);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $acc_req->to_postdata());
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
-
-        if ($info['http_code'] != 200) {
-            throw new \RuntimeException('Authorization failed for this key and secret.');
-        }
-        //Got the token, now let's store it in session
-        $rawTokenData = $this->parse_query($response, true);
-        $this->setToken(new Token($rawTokenData['oauth_token'],
-                $rawTokenData['oauth_token_secret']));
-        return true;
-    }
-
-    private function http_parse_headers($header)
+    protected function http_parse_headers($header)
     {
         $retVal = array();
         $fields = explode("\r\n",
@@ -288,7 +187,7 @@ class Connection
         return $retVal;
     }
 
-    private function parse_query($var, $only_params = false)
+    protected function parse_query($var, $only_params = false)
     {
         /**
          *  Use this function to parse out the query array element from
@@ -310,11 +209,11 @@ class Connection
         return $arr;
     }
     
-    private function getToken() {
+    protected function getToken() {
         return unserialize($this->session->get(self::SESSION_KEY, null));
     }
     
-    private function setToken(Token $token) {
+    protected function setToken(Token $token) {
         if ($this->session == null)
             throw new \RuntimeException("Need a valid session to store CartoDB auth token");
         $this->session->set(self::SESSION_KEY, serialize($token));

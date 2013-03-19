@@ -2,10 +2,23 @@
 
 simbiotica_carto_db:
     connections:
-        your_connection_name:
-            private:
+        private:
+            private: true
             key:
             secret:
             subdomain:
             email:
             password:
+        public:
+            private: false
+            subdomain:
+        private_fail:
+            private: true
+            key: foo
+            secret: foo
+            subdomain: foo
+            email: foo
+            password: foo
+        public_fail:
+            private: false
+            subdomain: foo

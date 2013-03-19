@@ -42,26 +42,23 @@ class SimbioticaCartoDBExtension extends Extension
      */
     protected function loadConnection($name, array $connection, ContainerBuilder $container)
     {
-        $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection'));
         if ($connection['private'])
         {
-            $configuration->setArguments(array(
-                $connection['key'],
-                $connection['secret'],
-                $connection['subdomain'],
-                $connection['email'],
-                $connection['password']
-           ));
+            $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection_private'))
+            ->setArguments(array(
+                    $connection['subdomain'],
+                    $connection['key'],
+                    $connection['secret'],
+                    $connection['email'],
+                    $connection['password']
+            ));
         }
         else
         {
-            $configuration->setArguments(array(
-                $connection['key'],
-                $connection['secret'],
-                $connection['subdomain'],
-                $connection['email'],
-                $connection['password']
-           ));
+            $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection_public'))
+            ->setArguments(array(
+                    $connection['subdomain']
+            ));
         }
     }
 }

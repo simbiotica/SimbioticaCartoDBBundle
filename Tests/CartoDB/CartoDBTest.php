@@ -9,16 +9,28 @@ use Simbiotica\CartoDBBundle\CartoDB\CartoDBClient;
 
 class CalculatorTest extends WebTestCase
 {
-    public function testBasicConnection()
+    public function testPrivateConnection()
     {
         $client = static::createClient();
         $container = $client->getContainer();
-        $cartoDBClient =  $container->get('simbiotica.cartodb_connection.simbiotica_beta');
         
-        $this->assertTrue($cartoDBClient->authorized);
-        $tables = $cartoDBClient->getTables();
+        $privateFailClient =  $container->get('simbiotica.cartodb_connection.private_fail');
+        $this->assertFalse($privateFailClient->authorized);
         
-        print_r($tables->__toString());
+        $privateClient =  $container->get('simbiotica.cartodb_connection.private');
+        $this->assertTrue($privateClient->authorized);
+    }
+    
+    public function testPublicConnection()
+    {
+        $client = static::createClient();
+        $container = $client->getContainer();
+        
+        $publicFailClient =  $container->get('simbiotica.cartodb_connection.public_fail');
+        $this->assertFalse($publicFailClient->authorized);
+        
+        $publicClient =  $container->get('simbiotica.cartodb_connection.public');
+        $this->assertTrue($publicClient->authorized);
     }
 }
 
