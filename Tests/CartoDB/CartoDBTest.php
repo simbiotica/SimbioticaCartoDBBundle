@@ -13,7 +13,7 @@ class CalculatorTest extends WebTestCase
     {
         $client = static::createClient();
         $container = $client->getContainer();
-        $cartoDBClient =  $container->get('simbiotica.cartodb.client');
+        $cartoDBClient =  $container->get('simbiotica.cartodb_connection.simbiotica_beta');
         
         $this->assertTrue($cartoDBClient->authorized);
         $tables = $cartoDBClient->getTables();

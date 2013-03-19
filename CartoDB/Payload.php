@@ -91,25 +91,21 @@ class Payload {
         $this->data = $data;
     }
 
-    function __get($name) {
+    function getColumnValues($name) {
         if(is_null($this->data) )
         {
-            $target = array();
             return null;
         }
-        elseif( is_array($this->data) && isset($this->data[$name]))
+        elseif( isset(reset($this->data)->$name))
         {
-            return $this->data[$name];
+            $result = array();
+            foreach ($this->data as $index => $values)
+            {
+                $result[$index] = isset($values->$name)?$values->$name:null;
+            }
+            return $result;
         }
         return null;
-    }
-    
-    function __set($name, $value) {
-        if(is_null($this->data) )
-        {
-            $this->data = array();
-        }
-        $this->data[$name] = $value;
     }
 }
 

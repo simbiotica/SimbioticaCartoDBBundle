@@ -1,4 +1,0 @@
-services:
-    simbiotica.cartodb.client:
-        class: Simbiotica\CartoDBBundle\CartoDB\CartoDBClient
-        arguments: [@session, "%cartodb.key%", "%cartodb.secret%", "%cartodb.subdomain%", "%cartodb.email%", "%cartodb.password%"]

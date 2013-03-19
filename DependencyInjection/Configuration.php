@@ -19,26 +19,28 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('simbiotica_cartodb');
+        $rootNode = $treeBuilder->root('simbiotica_carto_db');
 
-        $this->parseCredentials($rootNode);
-
-        return $treeBuilder;
-    }
-
-    /**
-     * @param \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $node
-     */
-    private function parseCredentials(ArrayNodeDefinition $node)
-    {
-        $node
+        $rootNode
             ->children()
-                ->scalarNode('key')->isRequired()->end()
-                ->scalarNode('secret')->isRequired()->end()
-                ->scalarNode('email')->isRequired()->end()
-                ->scalarNode('password')->isRequired()->end()
-                ->scalarNode('subdomain')->isRequired()->end()
+                ->arrayNode('connections')
+                    ->isRequired()
+                    ->requiresAtLeastOneElement()
+                    ->useAttributeAsKey('name')
+                    ->prototype('array')
+                    ->children()
+                        ->booleanNode('private')->isRequired()->defaultValue(true)->end()
+                        ->scalarNode('subdomain')->isRequired()->end()
+                        ->scalarNode('key')->isRequired()->end()
+                        ->scalarNode('secret')->isRequired()->end()
+                        ->scalarNode('email')->isRequired()->end()
+                        ->scalarNode('password')->isRequired()->end()
+                        
+                    ->end()
+                ->end()
             ->end()
         ;
+
+        return $treeBuilder;
     }
 }

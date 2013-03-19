@@ -16,7 +16,7 @@ use Eher\OAuth\Token;
 use Eher\OAuth\HmacSha1;
 use Eher\OAuth;
 
-class CartoDBClient
+class Connection
 {
     const SESSION_KEY = "cartodb";
     

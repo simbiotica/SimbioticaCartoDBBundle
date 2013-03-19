@@ -2,6 +2,7 @@
 
 namespace Simbiotica\CartoDBBundle\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -22,11 +23,45 @@ class SimbioticaCartoDBExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
         
-        foreach ($config as $key => $value) {
-            $container->setParameter('cartodb.'.$key, $value);
+        if (!empty($config['connections']) && is_array($config['connections'])) {
+            foreach ($config['connections'] as $name => $connection) {
+                $this->loadConnection($name, $connection, $container);
+            }
         }
-
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        
+        $loader =  new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.xml');
+    }
+    
+    /**
+     * Loads a configured DBAL connection.
+     *
+     * @param string           $name       The name of the connection
+     * @param array            $connection A dbal connection configuration.
+     * @param ContainerBuilder $container  A ContainerBuilder instance
+     */
+    protected function loadConnection($name, array $connection, ContainerBuilder $container)
+    {
+        $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection'));
+        if ($connection['private'])
+        {
+            $configuration->setArguments(array(
+                $connection['key'],
+                $connection['secret'],
+                $connection['subdomain'],
+                $connection['email'],
+                $connection['password']
+           ));
+        }
+        else
+        {
+            $configuration->setArguments(array(
+                $connection['key'],
+                $connection['secret'],
+                $connection['subdomain'],
+                $connection['email'],
+                $connection['password']
+           ));
+        }
     }
 }
