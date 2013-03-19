@@ -103,13 +103,11 @@ class Payload {
         }
         elseif( isset(reset($this->data)->$name))
         {
-            $result = array();
-            foreach ($this->data as $pos => $obj)
-            {
-                $index = isset($obj->cartodb_id)?$obj->cartodb_id:$pos;
-                $result[$index] = isset($obj->$name)?$obj->$name:null;
-            }
-            return $result;
+            $mapper = function($obj) use ($name) {
+                return $obj->$name;
+            };
+            
+            return array_map($mapper, $this->data);
         }
         return null;
     }
@@ -121,14 +119,11 @@ class Payload {
         }
         else
         {
-            $result = array();
-            foreach ($this->data as $pos => $obj)
-            {
-                $index = isset($obj->cartodb_id)?$obj->cartodb_id:$pos;
-                $result[$index] = array_intersect_key(get_object_vars($obj), array_flip($columns));
-            }
+            $mapper = function($obj) use ($columns) {
+                return array_intersect_key(get_object_vars($obj), array_flip($columns));
+            };
             
-            return $result;
+            return array_map($mapper, $this->data);
         }
     }
 }

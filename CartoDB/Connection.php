@@ -166,7 +166,27 @@ abstract class Connection
      */
     public function getAllRows($table, $params = array())
     { 
-        $sql = sprintf("SELECT * FROM %s WHERE 1=1", $table);
+        return $this->getAllRowsForColumns($table, null, $params);
+    }
+
+    /**
+     * Gets given columns from all the records of a defined table.
+     * @param $table the name of table
+     * @param $params array of parameters.
+     *   Valid parameters:
+     *   - 'rows_per_page' : Number of rows per page.
+     *   - 'page' : Page index.
+     *   - 'order' : array of $column => asc/desc.
+     */
+    public function getAllRowsForColumns($table, $columns = null, $params = array())
+    {
+        if (empty($columns))
+            $sql = sprintf("SELECT * FROM %s WHERE 1=1", $table);
+        elseif (is_array($columns) && count($columns) != 0)
+            $sql = sprintf("SELECT %s FROM %s WHERE 1=1", implode(', ', $columns), $table);
+        else 
+            return null;
+        
         if (isset($params['rows_per_page']))
         {
             $sql .= sprintf(" LIMIT %s", $params['rows_per_page']);
@@ -180,10 +200,10 @@ abstract class Connection
             }, array_flip($params['order']), $params['order']));
         }
         return $this->runSql($sql);
-        
+    
         return $this
-                ->request("tables/$table/records", 'GET',
-                        array('params' => $params));
+        ->request("tables/$table/records", 'GET',
+                array('params' => $params));
     }
 
     protected function http_parse_headers($header)
