@@ -79,23 +79,6 @@ class PublicConnection extends Connection
         return $payload;
     }
 
-    public function runSql($sql)
-    {
-        $params = array('q' => $sql);
-        $payload = $this->request('sql', 'POST', array('params' => $params));
-
-        if ($payload->getInfo()['http_code'] != 200) {
-            if (!empty($payload->getRawResponse()['return']['error']))
-                throw new \RuntimeException(
-                    'There was a problem with your request: '
-                            . implode('<br>', $payload->getRawResponse()['return']['error']));
-            else
-                throw new \RuntimeException('There was a problem with your request');
-        }
-        
-        return $payload;
-    }
-
     private function getAccessToken()
     {
         //No access token is needed, so we'll just check if we can access some tables.

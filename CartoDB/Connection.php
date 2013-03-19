@@ -50,21 +50,23 @@ abstract class Connection
         $this->session = $session;
     }
 
-    function __toString()
-    {
-        return "OAuthConsumer[key=$this->key, secret=$this->secret]";
-    }
-
     public function runSql($sql)
     {
         $params = array('q' => $sql);
         $payload = $this->request('sql', 'POST', array('params' => $params));
 
         if ($payload->getInfo()['http_code'] != 200) {
-            throw new \RuntimeException(
-                    'There was a problem with your request: '
-                            . implode('<br>', $payload->getRawResponse()['return']));
+            if (!empty($payload->getRawResponse()['return']['error']))
+                throw new \RuntimeException(sprintf(
+                    'There was a problem with your CartoDB request "%s": %s',
+                    $payload->getRequest()->__toString(),
+                    implode('<br>', $payload->getRawResponse()['return']['error'])));
+            else
+                throw new \RuntimeException(sprintf(
+                    'There was a problem with your CartoDB request "%s"',
+                    $payload->getRequest()->__toString()));
         }
+        
         return $payload;
     }
 
@@ -160,9 +162,25 @@ abstract class Connection
      *   Valid parameters:
      *   - 'rows_per_page' : Number of rows per page.
      *   - 'page' : Page index.
+     *   - 'order' : array of $column => asc/desc.
      */
-    public function getRecords($table, $params = array())
-    {
+    public function getAllRows($table, $params = array())
+    { 
+        $sql = sprintf("SELECT * FROM %s WHERE 1=1", $table);
+        if (isset($params['rows_per_page']))
+        {
+            $sql .= sprintf(" LIMIT %s", $params['rows_per_page']);
+            if (isset($params['page']))
+                $sql .= sprintf(" OFFSET %s", $params['page']);
+        }
+        if (isset($params['order']))
+        {
+            $sql .= ' ORDER BY '.implode(',', array_map(function ($field, $order){
+                return sprintf('%s %s', $field, $order);
+            }, array_flip($params['order']), $params['order']));
+        }
+        return $this->runSql($sql);
+        
         return $this
                 ->request("tables/$table/records", 'GET',
                         array('params' => $params));

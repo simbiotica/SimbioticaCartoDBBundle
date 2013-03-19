@@ -51,6 +51,11 @@ class Payload {
         return $this->rawResponse;
     }
     
+    public function getRequest()
+    {
+        return $this->request;
+    }
+    
     public function getTime()
     {
         return $this->time;
@@ -99,13 +104,32 @@ class Payload {
         elseif( isset(reset($this->data)->$name))
         {
             $result = array();
-            foreach ($this->data as $index => $values)
+            foreach ($this->data as $pos => $obj)
             {
-                $result[$index] = isset($values->$name)?$values->$name:null;
+                $index = isset($obj->cartodb_id)?$obj->cartodb_id:$pos;
+                $result[$index] = isset($obj->$name)?$obj->$name:null;
             }
             return $result;
         }
         return null;
+    }
+    
+    function getColumns(array $columns) {
+        if(is_null($this->data) )
+        {
+            return null;
+        }
+        else
+        {
+            $result = array();
+            foreach ($this->data as $pos => $obj)
+            {
+                $index = isset($obj->cartodb_id)?$obj->cartodb_id:$pos;
+                $result[$index] = array_intersect_key(get_object_vars($obj), array_flip($columns));
+            }
+            
+            return $result;
+        }
     }
 }
 
