@@ -55,12 +55,14 @@ abstract class Connection
         $params = array('q' => $sql);
         $payload = $this->request('sql', 'POST', array('params' => $params));
 
-        if ($payload->getInfo()['http_code'] != 200) {
-            if (!empty($payload->getRawResponse()['return']['error']))
+        $info = $payload->getInfo();
+        $rawResponse = $payload->getRawResponse();
+        if ($info['http_code'] != 200) {
+            if (!empty($rawResponse['return']['error']))
                 throw new \RuntimeException(sprintf(
                     'There was a problem with your CartoDB request "%s": %s',
                     $payload->getRequest()->__toString(),
-                    implode('<br>', $payload->getRawResponse()['return']['error'])));
+                    implode('<br>', $rawResponse['return']['error'])));
             else
                 throw new \RuntimeException(sprintf(
                     'There was a problem with your CartoDB request "%s"',
