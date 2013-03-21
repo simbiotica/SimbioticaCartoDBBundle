@@ -96,29 +96,56 @@ class Payload {
         $this->data = $data;
     }
 
-    function getColumnValues($name) {
+    /**
+     * Gets an array with all values of $name column, indexed by $index
+     * if $index is null, it will keep the original order returned from cartodb
+     * 
+     * @param string $name name of the column
+     * @param string $index optional: index
+     * @return NULL|multitype:
+     */
+    function getSingleColumnValues($name, $index = null) {
         if(is_null($this->data) )
         {
             return null;
         }
-        elseif( isset(reset($this->data)->$name))
+        elseif(isset(reset($this->data)->$name) && ($index == null || reset($this->data)->$index))
         {
-            $mapper = function($obj) use ($name) {
-                return $obj->$name;
-            };
-            
-            return array_map($mapper, $this->data);
+            $result = array();
+            foreach($this->data as $key => $obj)
+            {
+                $result[$index?$obj->$index:$key] = $obj->$name;
+            }
+            return $result;
         }
         return null;
     }
     
-    function getColumns(array $columns) {
+    /**
+     * For each row, return an array with the values of columns $columns, indexed by $index
+     * if $index is null, it will keep the original order returned from cartodb
+     *
+     * @param array $name names of the columns
+     * @param string $index optional: index
+     * @return NULL|multitype: array of rows, each with array of values
+     */
+    function getColumnsValues(array $columns, $index = null) {
         if(is_null($this->data) )
         {
             return null;
         }
-        else
+        elseif($index == null || reset($this->data)->$index)
         {
+            $result = array();
+            foreach($this->data as $key => $obj)
+            {
+                $result[$index?$obj->$index:$key] = array_intersect_key(get_object_vars($obj), array_flip($columns));
+            }
+            
+            var_dump($result);
+            die;
+            return $result;
+            
             $mapper = function($obj) use ($columns) {
                 return array_intersect_key(get_object_vars($obj), array_flip($columns));
             };

@@ -180,30 +180,59 @@ abstract class Connection
      */
     public function getAllRowsForColumns($table, $columns = null, $params = array())
     {
-        if (empty($columns))
-            $sql = sprintf("SELECT * FROM %s WHERE 1=1", $table);
-        elseif (is_array($columns) && count($columns) != 0)
-            $sql = sprintf("SELECT %s FROM %s WHERE 1=1", implode(', ', $columns), $table);
-        else 
-            return null;
+        return $this->getRowsForColumns($table, $columns, $filter = null, $params);
+    }
+    
+    /**
+     * Gets given columns from the records of a defined table that match the given condition.
+     * @param $table the name of table
+     * @param $params array of parameters.
+     *   Valid parameters:
+     *   - 'rows_per_page' : Number of rows per page.
+     *   - 'page' : Page index.
+     *   - 'order' : array of $column => asc/desc.
+     */
+    public function getRowsForColumns($table, $columns = null, $filter = null, $params = array())
+    {
+        if ($columns == null || !is_array($columns) || empty($columns))
+            $columnsString = "*";
+        else
+            $columnsString = implode(', ', $columns);
         
+        if ($filter == null || !is_array($filter) || empty($filter))
+            $filterString = "1=1";
+        else
+        {
+            $filterString = implode(' AND ', array_map(function($key, $elem)
+            {
+                if (is_int($elem))
+                    return sprintf('%s = %d', $key, $elem);
+                if (is_bool($elem))
+                    return sprintf('%s = %s', $key, $elem?'1':'0');
+                if (is_string($elem))
+                    return sprintf('%s = \'%s\'', $key, $elem);
+            }, array_keys($filter), $filter));
+        }
+        
+        $extrasString = '';
         if (isset($params['rows_per_page']))
         {
-            $sql .= sprintf(" LIMIT %s", $params['rows_per_page']);
+            $extrasString .= sprintf(" LIMIT %s", $params['rows_per_page']);
             if (isset($params['page']))
-                $sql .= sprintf(" OFFSET %s", $params['page']);
+                $extrasString .= sprintf(" OFFSET %s", $params['page']);
         }
         if (isset($params['order']))
         {
-            $sql .= ' ORDER BY '.implode(',', array_map(function ($field, $order){
+            $extrasString .= 'ORDER BY '.implode(',', array_map(function ($field, $order){
                 return sprintf('%s %s', $field, $order);
             }, array_flip($params['order']), $params['order']));
         }
+        
+        $sql = sprintf("SELECT %s FROM %s WHERE %s %s", $columnsString, $table, $filterString, $extrasString);
+        
+//         var_dump($sql);
+        
         return $this->runSql($sql);
-    
-        return $this
-        ->request("tables/$table/records", 'GET',
-                array('params' => $params));
     }
 
     protected function http_parse_headers($header)
