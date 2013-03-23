@@ -142,16 +142,9 @@ class Payload {
                 $result[$index?$obj->$index:$key] = array_intersect_key(get_object_vars($obj), array_flip($columns));
             }
             
-            var_dump($result);
-            die;
             return $result;
-            
-            $mapper = function($obj) use ($columns) {
-                return array_intersect_key(get_object_vars($obj), array_flip($columns));
-            };
-            
-            return array_map($mapper, $this->data);
         }
+        return null;
     }
 }
 

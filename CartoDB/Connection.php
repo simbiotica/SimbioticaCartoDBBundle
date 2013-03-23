@@ -118,7 +118,6 @@ abstract class Connection
 
     public function getTableNames()
     {
-//         $sql = "select * from information_schema.tables WHERE table_type='BASE TABLE'";
         $sql = "SELECT \"pg_class\".\"oid\", \"pg_class\".\"relname\" FROM \"pg_class\" INNER JOIN \"pg_namespace\" ON (\"pg_namespace\".\"oid\" = \"pg_class\".\"relnamespace\") WHERE ((\"relkind\" = 'r') AND (\"nspname\" = 'public') AND (\"relname\" NOT IN ('spatial_ref_sys', 'geography_columns', 'geometry_columns', 'raster_columns', 'raster_overviews', 'cdb_tablemetadata')))";
                 
         return $this->runSql($sql);
