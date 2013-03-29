@@ -13,11 +13,7 @@ final class CartoDBLink extends Annotation
 {
     public $connection;
     public $table;
-    
-    public function __toString()
-    {
-        return sprintf("Connection: %s; Table: %s", $this->connection, $this->table);
-    }
+    public $cascade = array('persist');
 }
 
 ?>

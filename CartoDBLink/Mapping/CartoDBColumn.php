@@ -13,6 +13,7 @@ final class CartoDBColumn extends Annotation
 {
     public $column;
     public $strong = false;
+    public $index = false;
 }
 
 ?>

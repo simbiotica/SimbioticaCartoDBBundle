@@ -130,12 +130,28 @@ abstract class Connection
 
     public function insertRow($table, $data)
     {
+        var_dump($this->authorized);
         $keys = implode(',', array_keys($data));
-        $values = implode(',', array_values($data));
-        $sql = "INSERT INTO $table ($keys) VALUES($values);";
-        $sql .= "SELECT $table.cartodb_id as id, $table.* FROM $table ";
-        $sql .= "WHERE cartodb_id = currval('public." . $table
-                . "_cartodb_id_seq');";
+        foreach(array_values($data) as $key => $elem)
+        {
+            if(is_null($elem))
+                continue;
+            if (is_int($elem))
+                $values[$key] = sprintf('%d', $elem);
+            elseif (is_bool($elem))
+                $values[$key] = sprintf('%s', $elem?'1':'0');
+            elseif (is_string($elem))
+                $values[$key] = sprintf('\'%s\'', $elem);
+        }
+        $valuesString = implode(',', $values);
+        
+        $sql = "INSERT INTO $table ($keys) VALUES($valuesString);";
+//         $sql .= "SELECT $table.cartodb_id as id, $table.* FROM $table ";
+//         $sql .= "WHERE cartodb_id = currval('public." . $table
+//                 . "_cartodb_id_seq');";
+        
+        var_dump($sql);
+        
         return $this->runSql($sql);
     }
 
