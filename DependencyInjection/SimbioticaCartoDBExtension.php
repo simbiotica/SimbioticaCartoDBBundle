@@ -23,14 +23,29 @@ class SimbioticaCartoDBExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
         
+        $loader =  new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.xml');
+        
+        foreach ($config['orm'] as $name => $listeners) {
+            foreach ($listeners as $ext => $enabled) {
+                $listener = sprintf('cartodb.listener.%s', $ext);
+                if ($enabled && $container->hasDefinition($listener)) {
+                    $attributes = array('connection' => $name);
+                    $definition = $container->getDefinition($listener);
+                    $definition->addTag('doctrine.event_subscriber', $attributes);
+                }
+            }
+
+            $this->entityManagers[$name] = $listeners;
+        }
+        
         if (!empty($config['connections']) && is_array($config['connections'])) {
             foreach ($config['connections'] as $name => $connection) {
                 $this->loadConnection($name, $connection, $container);
             }
         }
         
-        $loader =  new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.xml');
+        
     }
     
     /**

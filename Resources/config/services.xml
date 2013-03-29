@@ -8,6 +8,7 @@
 	    <parameter key="cartodb_connection_private.class">Simbiotica\CartoDBBundle\CartoDB\PrivateConnection</parameter>
 	    <parameter key="cartodb_connection_public.class">Simbiotica\CartoDBBundle\CartoDB\PublicConnection</parameter>
 	    <parameter key="cartodb_connection_factory.class">Simbiotica\CartoDBBundle\CartoDB\ConnectionFactory</parameter>
+	    <parameter key="cartodb.listener.cartodblink.class">Simbiotica\CartoDBBundle\CartoDBLink\CartoDBLinkListener</parameter>
 	</parameters>
 	
 	<services>
@@ -26,6 +27,12 @@
                  factory-service="cartodb_connection_factory"
                  factory-method="createPublicConnection"
         />
+        
+        <service id="cartodb.listener.cartodblink" class="%cartodb.listener.cartodblink.class%" public="false">
+            <call method="setAnnotationReader">
+                <argument type="service" id="annotation_reader" />
+            </call>
+        </service>
 	</services>
 	
 </container>

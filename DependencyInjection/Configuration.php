@@ -22,6 +22,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('simbiotica_carto_db');
 
         $rootNode
+            ->append($this->getAnnotationNode('orm'))
             ->children()
                 ->arrayNode('connections')
                     ->isRequired()
@@ -42,5 +43,26 @@ class Configuration implements ConfigurationInterface
         ;
 
         return $treeBuilder;
+    }
+    
+    /**
+     * @param string $name
+     */
+    private function getAnnotationNode($name)
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root($name);
+    
+        $node
+        ->useAttributeAsKey('id')
+            ->prototype('array')
+            ->performNoDeepMerging()
+            ->children()
+                ->booleanNode('cartodblink')->defaultFalse()->end()
+            ->end()
+        ->end()
+        ;
+    
+        return $node;
     }
 }
