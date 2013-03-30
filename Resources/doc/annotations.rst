@@ -13,7 +13,8 @@ edition, deletion and loading of objects from ORM. Consider yourself warned.
 
 
 .. code-block:: php
-# app/config/config.yml
+
+// app/config/config.yml
 namespace Simbiotica\AcmeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -48,7 +49,7 @@ class Project
     
 }
 
-```
+
 
 Two annotations are used:
 
