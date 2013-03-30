@@ -11,9 +11,9 @@ use Doctrine\Common\Annotations\Annotation;
 
 final class CartoDBLink extends Annotation
 {
-    public $connection;
-    public $table;
-    public $cascade = array('persist');
+    public $connection; //name of the connection to use
+    public $table; //name of the table it links to
+    public $cascade = array('persist'); //can be persist, remove or all. Defines when sync will occur
 }
 
 ?>

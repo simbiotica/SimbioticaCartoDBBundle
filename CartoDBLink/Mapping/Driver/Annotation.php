@@ -24,6 +24,7 @@ class Annotation extends AbstractAnnotationDriver
             {
                 $config['connection'] = $annot->connection;
                 $config['table'] = $annot->table;
+                $config['cascade'] = $annot->cascade;
             }
             if ($annot->cascade)
             {

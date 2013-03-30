@@ -26,5 +26,7 @@ simbiotica_carto_db:
 
 All fields are required. For each connection, a service is created.
 
-
+Check the CartoDB\Connection class to see which methods are available. Some
+of them (table structure manipulation) are not yet adapted from v1 API, and
+may not work.  
 

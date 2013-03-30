@@ -59,14 +59,17 @@ class PrivateConnection extends Connection
 
     protected function request($uri, $method = 'GET', $args = array())
     {
-        $args['api_key'] = $this->apiKey;
+        if (!array_key_exists('params', $args))
+            $args['params'] = array();
+        $args['params']['api_key'] = $this->apiKey;
+        
         $url = $this->apiUrl . $uri;
         $sig_method = new HmacSha1();
         $consumer = new Consumer($this->consumerKey, $this->consumerSecret, NULL);
         $token = $this->getToken();
 
         $acc_req = Request::from_consumer_and_token($consumer, $token,
-                $method, $url, isset($args['params'])?$args['params']:array());
+                $method, $url, $args['params']);
         if (!isset($args['headers']['Accept'])) {
             $args['headers']['Accept'] = 'application/json';
         }

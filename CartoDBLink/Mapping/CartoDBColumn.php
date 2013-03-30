@@ -11,9 +11,9 @@ use Doctrine\Common\Annotations\Annotation;
 
 final class CartoDBColumn extends Annotation
 {
-    public $column;
-    public $strong = false;
-    public $index = false;
+    public $column; //name of cartodb column
+    public $strong = false; //if true, will override local value with cartodb's on load
+    public $index = false; //if true, this cartodb column will store the local id
 }
 
 ?>

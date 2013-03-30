@@ -49,7 +49,7 @@ abstract class Connection
         
         $this->session = $session;
         $this->subdomain = $subdomain;
-        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v1/', $this->subdomain);
+        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v2/', $this->subdomain);
         
         $this->authorized = $this->getAccessToken();
     }
@@ -138,13 +138,22 @@ abstract class Connection
         return $this->request("tables/$table/records/$row");
     }
 
+    /**
+     * Inserts $data row into $table. 
+     * 
+     * @param unknown $table name of table
+     * @param unknown $data pairs of name_of_row/value
+     * 
+     * @return cartodb_id of inserted row
+     */
     public function insertRow($table, $data)
     {
         $keys = implode(',', array_keys($data));
+        $values = array();
         foreach(array_values($data) as $key => $elem)
         {
             if(is_null($elem))
-                continue;
+                $values[$key] = null;
             if (is_int($elem))
                 $values[$key] = sprintf('%d', $elem);
             elseif (is_bool($elem))
@@ -154,12 +163,7 @@ abstract class Connection
         }
         $valuesString = implode(',', $values);
         
-        $sql = "INSERT INTO $table ($keys) VALUES($valuesString);";
-//         $sql .= "SELECT $table.cartodb_id as id, $table.* FROM $table ";
-//         $sql .= "WHERE cartodb_id = currval('public." . $table
-//                 . "_cartodb_id_seq');";
-        
-        var_dump($sql);
+        $sql = "INSERT INTO $table ($keys) VALUES($valuesString) RETURNING cartodb_id;";
         
         return $this->runSql($sql);
     }
@@ -167,11 +171,22 @@ abstract class Connection
     public function updateRow($table, $row_id, $data)
     {
         $keys = implode(',', array_keys($data));
-        $values = implode(',', array_values($data));
-        $sql = "UPDATE $table SET ($keys) = ($values) WHERE cartodb_id = $row_id;";
-        $sql .= "SELECT $table.cartodb_id as id, $table.* FROM $table ";
-        $sql .= "WHERE cartodb_id = currval('public." . $table
-                . "_cartodb_id_seq');";
+        $values = array();
+        foreach(array_values($data) as $key => $elem)
+        {
+            if(is_null($elem))
+                $values[$key] = null;
+            if (is_int($elem))
+                $values[$key] = sprintf('%d', $elem);
+            elseif (is_bool($elem))
+                $values[$key] = sprintf('%s', $elem?'1':'0');
+            elseif (is_string($elem))
+                $values[$key] = sprintf('\'%s\'', $elem);
+        }
+        $valuesString = implode(',', $values);
+        
+        $sql = "UPDATE $table SET ($keys) = ($valuesString) WHERE cartodb_id = $row_id RETURNING cartodb_id;";
+        
         return $this->runSql($sql);
     }
 
