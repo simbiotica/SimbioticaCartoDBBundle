@@ -12,7 +12,7 @@ class AppKernel extends Kernel
     {
         return array(
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new Simbiotica\CartoDBBundle\SimbioticaCartoDBBundle()
+            new Simbiotica\CartoDBBundle\SimbioticaCartoDBBundle(),
         );
     }
 

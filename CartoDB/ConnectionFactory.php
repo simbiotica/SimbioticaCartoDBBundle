@@ -20,9 +20,9 @@ class ConnectionFactory
     /**
      * Create a private connection by name.
      */
-    public function createPrivateConnection($subdomain, $key, $secret, $email, $password)
+    public function createPrivateConnection($subdomain, $apiKey, $consumerKey, $consumerSecret, $email, $password)
     {
-        return new PrivateConnection($this->session, $subdomain, $key, $secret, $email, $password);
+        return new PrivateConnection($this->session, $subdomain, $apiKey, $consumerKey, $consumerSecret, $email, $password);
     }
     
     /**

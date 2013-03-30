@@ -19,28 +19,36 @@ use Eher\OAuth;
 class PrivateConnection extends Connection
 {
     /**
+     * Necessary data to connect to CartoDB
+     */
+    protected $apiKey;
+    protected $consumerKey;
+    protected $consumerSecret;
+    protected $email;
+    protected $password;
+    
+    /**
      * Constructs CartoDB connection and stores token in session
      * @throws RuntimeException on connection or auth failure
      * 
      * @param Session $session
-     * @param unknown $key
-     * @param unknown $secret
+     * @param unknown $consumerKey
+     * @param unknown $consumerSecret
      * @param unknown $subdomain
      * @param unknown $email
      * @param unknown $password
      */
-    function __construct(Session $session, $subdomain, $key, $secret, $email, $password)
+    function __construct(Session $session, $subdomain, $apiKey, $consumerKey, $consumerSecret, $email, $password)
     {
-        $this->session = $session;
+        parent::__construct($session, $subdomain);
         
-        $this->key = $key;
-        $this->secret = $secret;
-        $this->subdomain = $subdomain;
+        $this->apiKey = $apiKey;
+        $this->consumerKey = $consumerKey;
+        $this->consumerSecret = $consumerSecret;
         $this->email = $email;
         $this->password = $password;
 
         $this->oauthUrl = sprintf('https://%s.cartodb.com/oauth/', $this->subdomain);
-        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v2/', $this->subdomain);
 
         $this->authorized = $this->getAccessToken();
     }
@@ -51,9 +59,10 @@ class PrivateConnection extends Connection
 
     protected function request($uri, $method = 'GET', $args = array())
     {
+        $args['api_key'] = $this->apiKey;
         $url = $this->apiUrl . $uri;
         $sig_method = new HmacSha1();
-        $consumer = new Consumer($this->key, $this->secret, NULL);
+        $consumer = new Consumer($this->consumerKey, $this->consumerSecret, NULL);
         $token = $this->getToken();
 
         $acc_req = Request::from_consumer_and_token($consumer, $token,
@@ -89,14 +98,16 @@ class PrivateConnection extends Connection
         return $payload;
     }
 
-    private function getAccessToken()
+    protected function getAccessToken()
     {
         $sig_method = new HmacSha1();
-        $consumer = new Consumer($this->key, $this->secret, NULL);
+        $consumer = new Consumer($this->consumerKey, $this->consumerSecret, NULL);
 
-        $params = array('x_auth_username' => $this->email,
+        $params = array(
+                'x_auth_username' => $this->email,
                 'x_auth_password' => $this->password,
-                'x_auth_mode' => 'client_auth');
+                'x_auth_mode' => 'client_auth'
+        );
 
         $acc_req = Request::from_consumer_and_token($consumer, NULL,
                 "POST", $this->oauthUrl . 'access_token', $params);

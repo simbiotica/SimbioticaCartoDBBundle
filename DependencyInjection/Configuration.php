@@ -32,8 +32,9 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->booleanNode('private')->isRequired()->defaultValue(true)->end()
                         ->scalarNode('subdomain')->isRequired()->end()
-                        ->scalarNode('key')->end()
-                        ->scalarNode('secret')->end()
+                        ->scalarNode('api_key')->end()
+                        ->scalarNode('consumer_key')->end()
+                        ->scalarNode('consumer_secret')->end()
                         ->scalarNode('email')->end()
                         ->scalarNode('password')->end()
                         

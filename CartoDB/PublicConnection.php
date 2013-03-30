@@ -29,22 +29,12 @@ class PublicConnection extends Connection
      * @param unknown $email
      * @param unknown $password
      */
-    function __construct(Session $session, $subdomain)
-    {
-        $this->session = $session;
-        
-        $this->subdomain = $subdomain;
-
-        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v2/', $this->subdomain);
-
-        $this->authorized = $this->getAccessToken();
-    }
     
     public function setSession(Session $session) {
         $this->session = $session;
     }
 
-    private function request($uri, $method = 'GET', $args = array())
+    protected function request($uri, $method = 'GET', $args = array())
     {
         $url = $this->apiUrl . $uri;
 
@@ -79,7 +69,7 @@ class PublicConnection extends Connection
         return $payload;
     }
 
-    private function getAccessToken()
+    protected function getAccessToken()
     {
         //No access token is needed, so we'll just check if we can access some tables.
         try {

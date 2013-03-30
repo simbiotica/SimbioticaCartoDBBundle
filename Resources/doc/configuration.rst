@@ -15,8 +15,9 @@ simbiotica_carto_db:
         #create simbiotica.cartodb_connection.your_private_connection service
         your_private_connection:
             private: true
-            key: 
-            secret: 
+            api_key:
+            consumer_key: 
+            consumer_secret: 
             subdomain: 
             email: 
             password: 

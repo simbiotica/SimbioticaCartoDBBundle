@@ -18,20 +18,17 @@ use Eher\OAuth;
 
 abstract class Connection
 {
-    const SESSION_KEY = "cartodb";
+    const SESSION_KEY_SEED = "cartodb";
     
     /**
      * Session to store token
      **/
     protected $session;
+    protected $sessionKey;
     
     /**
      * Necessary data to connect to CartoDB
      */
-    protected $key;
-    protected $secret;
-    protected $email;
-    protected $password;
     protected $subdomain;
     
     /**
@@ -46,6 +43,19 @@ abstract class Connection
     protected $oauthUrl;
     protected $apiUrl;
 
+    function __construct(Session $session, $subdomain)
+    {
+        $this->sessionKey = Connection::SESSION_KEY_SEED.'-'.$subdomain;
+        
+        $this->session = $session;
+        $this->subdomain = $subdomain;
+        $this->apiUrl = sprintf('https://%s.cartodb.com/api/v1/', $this->subdomain);
+        
+        $this->authorized = $this->getAccessToken();
+    }
+    
+    abstract protected function getAccessToken();
+    
     public function setSession(Session $session) {
         $this->session = $session;
     }
@@ -130,7 +140,6 @@ abstract class Connection
 
     public function insertRow($table, $data)
     {
-        var_dump($this->authorized);
         $keys = implode(',', array_keys($data));
         foreach(array_values($data) as $key => $elem)
         {
@@ -247,8 +256,6 @@ abstract class Connection
         
         $sql = sprintf("SELECT %s FROM %s WHERE %s %s", $columnsString, $table, $filterString, $extrasString);
         
-//         var_dump($sql);
-        
         return $this->runSql($sql);
     }
 
@@ -294,13 +301,13 @@ abstract class Connection
     }
     
     protected function getToken() {
-        return unserialize($this->session->get(self::SESSION_KEY, null));
+        return unserialize($this->session->get($this->sessionKey, null));
     }
     
     protected function setToken(Token $token) {
         if ($this->session == null)
             throw new \RuntimeException("Need a valid session to store CartoDB auth token");
-        $this->session->set(self::SESSION_KEY, serialize($token));
+        $this->session->set($this->sessionKey, serialize($token));
     }
 }
 

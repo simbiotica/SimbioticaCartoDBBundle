@@ -19,6 +19,8 @@ class CalculatorTest extends WebTestCase
         
         $privateClient =  $container->get('simbiotica.cartodb_connection.private');
         $this->assertTrue($privateClient->authorized);
+        
+        $privateClient->insertRow('projects', array('name' => 'project one'));
     }
     
     public function testPublicConnection()
