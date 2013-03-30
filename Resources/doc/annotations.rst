@@ -14,40 +14,40 @@ edition, deletion and loading of objects from ORM. Consider yourself warned.
 
 .. code-block:: php
 
-// app/config/config.yml
-namespace Simbiotica\AcmeBundle\Entity;
-
-use Doctrine\ORM\Mapping as ORM;
-use Simbiotica\CartoDBBundle\CartoDBLink\Mapping as CartoDB;
-
-/**
- * @ORM\Entity
- * @ORM\Table(name="project")
- * @CartoDB\CartoDBLink(connection="your_private_connection", table="projects", cascade={"all"})
- */
-
-class Project
-{
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
-     * @ORM\Column(name="name", type="string", length=128, nullable=true)
-     * @CartoDB\CartoDBColumn(column="name", strong=true)
-     */
-    protected $name;
-    
-    /**
-     * @ORM\Column(name="cartodb_index", type="integer", nullable=true)
-     * @CartoDB\CartoDBColumn(column="index", index=true)
-     */
-    protected $cartodbIndex;
-    
-}
+   // app/config/config.yml
+   namespace Simbiotica\AcmeBundle\Entity;
+   
+   use Doctrine\ORM\Mapping as ORM;
+   use Simbiotica\CartoDBBundle\CartoDBLink\Mapping as CartoDB;
+   
+   /**
+    * @ORM\Entity
+    * @ORM\Table(name="project")
+    * @CartoDB\CartoDBLink(connection="your_private_connection", table="projects", cascade={"all"})
+    */
+   
+   class Project
+   {
+       /**
+        * @ORM\Id
+        * @ORM\Column(type="integer")
+        * @ORM\GeneratedValue(strategy="AUTO")
+        */
+       protected $id;
+   
+       /**
+        * @ORM\Column(name="name", type="string", length=128, nullable=true)
+        * @CartoDB\CartoDBColumn(column="name", strong=true)
+        */
+       protected $name;
+       
+       /**
+        * @ORM\Column(name="cartodb_index", type="integer", nullable=true)
+        * @CartoDB\CartoDBColumn(column="index", index=true)
+        */
+       protected $cartodbIndex;
+       
+   }
 
 
 
