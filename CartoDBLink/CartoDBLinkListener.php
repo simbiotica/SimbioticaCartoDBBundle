@@ -159,6 +159,9 @@ class CartoDBLinkListener extends MappedEventSubscriber
         $meta = $om->getClassMetadata(get_class($object));
         $config = $this->getConfiguration($om, $meta->name);
         if ($config = $this->getConfiguration($om, $meta->name)) {
+            if (!in_array("fetch", $config['cascade']) && !in_array("all", $config['cascade']))
+                return;
+            
             $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
             
             $data = array();

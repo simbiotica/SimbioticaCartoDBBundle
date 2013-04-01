@@ -28,9 +28,9 @@ class Annotation extends AbstractAnnotationDriver
             }
             if ($annot->cascade)
             {
-                if (count(array_diff($annot->cascade, array('persist', 'remove', 'all'))) > 0)
+                if (count(array_diff($annot->cascade, array('fetch', 'persist', 'remove', 'all'))) > 0)
                 {
-                    throw new InvalidMappingException("CartoDBLink: cascade can have \"persist\", \"remove\" or \"all\", found: ".implode(", ", array_diff($annot->cascade, array('persist', 'remove', 'all'))));
+                    throw new InvalidMappingException("CartoDBLink: cascade can have \"fetch\", \"persist\", \"remove\" or \"all\", found: ".implode(", ", array_diff($annot->cascade, array('persist', 'remove', 'all'))));
                 }
             }
         }

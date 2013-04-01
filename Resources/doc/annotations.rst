@@ -73,8 +73,8 @@ States that this class is linked to CartoDB.
 - connection (required) : the name of the connection that will be used to connect to
 CartoDB, as specified in you configuration files
 - table (required) : the name of the CartoDB table to which this entity will be mapped
-- cascade (optional, can have "persist", "remove" and "all", default: persist):
-when will syncing occur. By default, only propagates changes on insert and update.
+- cascade (optional, can have "fetch", "persist", "remove" and "all", default: fetch + persist):
+when will syncing occur. By default, only propagates changes on fetch, insert and update.
 
 CartoDBColumn
 ~~~~~~~~~~~~~
@@ -99,4 +99,5 @@ Some of them will be implemented in a near future, others in a not-so-near
 future, others in your future (aka submit a PR with them):
 - Syncing only works for fields managed by Doctrine. Syncing for non-doctrine
 managed fields is high up on my TODO list
+- XML and YAML class configuration
 - (some other stuff)
