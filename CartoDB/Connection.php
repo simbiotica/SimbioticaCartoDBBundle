@@ -82,50 +82,136 @@ abstract class Connection
         return $payload;
     }
 
-    public function createTable($table, $schema = NULL)
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Creates a new table
+     * 
+     * @param unknown $table The name of the table
+     * @param array $schema Array with ($column_name => $type) pairs
+     */
+    public function createTable($table, array $schema = NULL)
     {
-        $params = array('name' => $table);
+        $schema = array_merge(array(
+                'cartodb_id' => 'integer',
+        ), $schema);
+        
         if ($schema) {
             $cols = array();
             foreach ($schema as $key => $value) {
                 $cols[] = "$key $value";
             }
-            $params['schema'] = implode(',', $cols);
+            $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", $table, implode(", ", $cols));
         }
-        return $this->request('tables', 'POST', array('params' => $params));
+        else
+            $sql = sprintf("CREATE TABLE IF NOT EXISTS %s", $table);
+        
+        return $this->runSql($sql);
+    }
+    
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Retrieves metadata about the table columns
+     * 
+     * @param unknown $table Table name
+     * @param boolean $full If true, retrieves full column information. Defaults to false,
+     * which only returns the names
+     */
+    public function showTable($table, $full = false)
+    {
+        if ($full)
+            $sql = sprintf("SELECT * FROM information_schema.columns WHERE table_name ='%s'", $table);
+        else
+            $sql = sprintf("SELECT column_name FROM information_schema.columns WHERE table_name ='%s'", $table);
+    
+        return $this->runSql($sql);
     }
 
+    /**
+     * API v2 - Not officialy supported
+     *
+     * Deletes a table
+     *
+     * @param unknown $table Table name
+     */
     public function dropTable($table)
     {
-        return $this->request("tables/$table", 'DELETE');
+        $sql = sprintf("DROP TABLE %s", $table);
+    
+        return $this->runSql($sql);
     }
 
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Adds a column to an existing table
+     * 
+     * @param unknown $table The table name
+     * @param unknown $column_name Name of the column to be added
+     * @param unknown $column_type Type of the column to be added
+     */
     public function addColumn($table, $column_name, $column_type)
     {
-        $params = array();
-        $params['name'] = $column_name;
-        $params['type'] = $column_type;
-        return $this
-                ->request("tables/$table/columns", 'POST',
-                        array('params' => $params));
+        $sql = sprintf("ALTER TABLE %s ADD COLUMN %s %s", $table, $column_name, $column_type);
+    
+        return $this->runSql($sql);
     }
 
-    public function dropColumn($table, $column)
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Deletes a column from an existing table
+     * 
+     * @param unknown $table The table name
+     * @param unknown $column_name 
+     */
+    public function dropColumn($table, $column_name)
     {
-        return $this->request("tables/$table/columns/$column", 'DELETE');
+        $sql = sprintf("ALTER TABLE %s DROP COLUMN %s", $table, $column_name);
+    
+        return $this->runSql($sql);
     }
 
-    public function changeColumn($table, $column, $new_column_name,
-            $new_column_type)
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Rename a column
+     * 
+     * @param unknown $table Table name
+     * @param unknown $column_name Column current name
+     * @param unknown $new_column_name Column new name
+     */
+    public function changeColumnName($table, $column_name, $new_column_name)
     {
-        $params = array();
-        $params['name'] = $new_column_name;
-        $params['type'] = $new_column_type;
-        return $this
-                ->request("tables/$table/columns/$column", 'PUT',
-                        array('params' => $params));
+        $sql = sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s", $table, $column_name, $new_column_name);
+    
+        return $this->runSql($sql);
+    }
+    
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Change a column type
+     * Warning: Not all conversions can be achieved. Check PostreSQL docs on
+     * column type changing for more information.
+     * 
+     * @param unknown $table Table name
+     * @param unknown $column_name Column to change
+     * @param unknown $new_column_type New data type
+     */
+    public function changeColumnType($table, $column_name, $new_column_type)
+    {
+        $sql = sprintf("ALTER TABLE %s ALTER COLUMN %s TYPE %s", $table, $column_name, $new_column_type);
+    
+        return $this->runSql($sql);
     }
 
+    /**
+     * API v2 - Not officialy supported
+     * 
+     * Gets the name of all available tables
+     */
     public function getTableNames()
     {
         $sql = "SELECT \"pg_class\".\"oid\", \"pg_class\".\"relname\" FROM \"pg_class\" INNER JOIN \"pg_namespace\" ON (\"pg_namespace\".\"oid\" = \"pg_class\".\"relnamespace\") WHERE ((\"relkind\" = 'r') AND (\"nspname\" = 'public') AND (\"relname\" NOT IN ('spatial_ref_sys', 'geography_columns', 'geometry_columns', 'raster_columns', 'raster_overviews', 'cdb_tablemetadata')))";
@@ -133,16 +219,13 @@ abstract class Connection
         return $this->runSql($sql);
     }
 
-    public function getRow($table, $row)
-    {
-        return $this->request("tables/$table/records/$row");
-    }
-
     /**
-     * Inserts $data row into $table. 
+     * API v2
      * 
-     * @param unknown $table name of table
-     * @param unknown $data pairs of name_of_row/value
+     * Inserts data row into $table. 
+     * 
+     * @param unknown $table Name of table
+     * @param unknown $data Array with ($column_name => $new_value) pairs to be updated
      * 
      * @return cartodb_id of inserted row
      */
@@ -168,6 +251,15 @@ abstract class Connection
         return $this->runSql($sql);
     }
 
+    /**
+     * API v2
+     * 
+     * For $table, updates row with cartodb_id $row_id with $data values
+     * 
+     * @param unknown $table Table to be updated
+     * @param unknown $row_id Cartodb_id of the row to be updated
+     * @param unknown $data Array with ($column_name => $new_value) pairs to be updated 
+     */
     public function updateRow($table, $row_id, $data)
     {
         $keys = implode(',', array_keys($data));
@@ -197,6 +289,8 @@ abstract class Connection
     }
 
     /**
+     * API v2
+     * 
      * Gets all the records of a defined table.
      * @param $table the name of table
      * @param $params array of parameters.
@@ -211,6 +305,8 @@ abstract class Connection
     }
 
     /**
+     * API v2
+     * 
      * Gets given columns from all the records of a defined table.
      * @param $table the name of table
      * @param $params array of parameters.
@@ -225,6 +321,8 @@ abstract class Connection
     }
     
     /**
+     * API v2
+     * 
      * Gets given columns from the records of a defined table that match the given condition.
      * @param $table the name of table
      * @param $params array of parameters.

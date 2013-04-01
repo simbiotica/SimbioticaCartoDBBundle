@@ -7,10 +7,23 @@ using annotations
 WARNING
 -------
 
-Using this feature will greatly increase the time needed to fetch/persist
+Using this feature will increase the time needed to fetch/persist
 entities, as a call to a (most likely) remote server is done on creation,
 edition, deletion and loading of objects from ORM. Consider yourself warned. 
 
+
+Configuration
+-------------
+
+.. code-block:: yml
+
+   simbiotica_carto_db:
+       orm:
+           default:
+               cartodblink: true
+
+This enables the use of annotations. After this, you can use annotations
+in your classes:
 
 .. code-block:: php
 
