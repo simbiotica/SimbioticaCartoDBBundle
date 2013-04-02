@@ -99,5 +99,7 @@ Some of them will be implemented in a near future, others in a not-so-near
 future, others in your future (aka submit a PR with them):
 - Syncing only works for fields managed by Doctrine. Syncing for non-doctrine
 managed fields is high up on my TODO list
+- Unidirectional references, for when you can't / don't want to change one
+of the DBs.
 - XML and YAML class configuration
 - (some other stuff)

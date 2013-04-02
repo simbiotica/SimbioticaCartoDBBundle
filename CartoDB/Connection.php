@@ -86,14 +86,17 @@ abstract class Connection
      * API v2 - Not officialy supported
      * 
      * Creates a new table
+     * Warning: tables created this way will NOT show up on your CartoDB dashboard
+     * Also, several features, like created_at and updated_at will not work
+     * automatically
      * 
      * @param unknown $table The name of the table
      * @param array $schema Array with ($column_name => $type) pairs
      */
-    public function createTable($table, array $schema = NULL)
+    public function createTable($table, array $schema)
     {
         $schema = array_merge(array(
-                'cartodb_id' => 'integer',
+                'cartodb_id' => 'serial',
         ), $schema);
         
         if ($schema) {
@@ -137,7 +140,7 @@ abstract class Connection
      */
     public function dropTable($table)
     {
-        $sql = sprintf("DROP TABLE %s", $table);
+        $sql = sprintf("DROP TABLE IF EXISTS %s", $table);
     
         return $this->runSql($sql);
     }
@@ -236,13 +239,13 @@ abstract class Connection
         foreach(array_values($data) as $key => $elem)
         {
             if(is_null($elem))
-                $values[$key] = null;
-            if (is_int($elem))
+                $values[$key] = 'NULL';
+            elseif (is_int($elem))
                 $values[$key] = sprintf('%d', $elem);
             elseif (is_bool($elem))
                 $values[$key] = sprintf('%s', $elem?'1':'0');
             elseif (is_string($elem))
-                $values[$key] = sprintf('\'%s\'', $elem);
+                $values[$key] = sprintf('\'%s\'', pg_escape_string($elem));
         }
         $valuesString = implode(',', $values);
         
@@ -267,8 +270,8 @@ abstract class Connection
         foreach(array_values($data) as $key => $elem)
         {
             if(is_null($elem))
-                $values[$key] = null;
-            if (is_int($elem))
+                $values[$key] = 'NULL';
+            elseif (is_int($elem))
                 $values[$key] = sprintf('%d', $elem);
             elseif (is_bool($elem))
                 $values[$key] = sprintf('%s', $elem?'1':'0');

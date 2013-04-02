@@ -20,6 +20,14 @@ class CartoDBLinkListener extends MappedEventSubscriber
      * @var array
      */
     protected $pendingInserts = array();
+    
+    /**
+     * These are pending relations in case it does not
+     * have an identifier yet
+     *
+     * @var array
+     */
+    protected $pendingRelatedObjects = array();
 
     public function __construct(ContainerInterface $container)
     {
@@ -50,14 +58,43 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 if (!in_array("persist", $config['cascade']) && !in_array("all", $config['cascade']))
                     continue;
                 
+                foreach($config['columns'] as $field => $column)
+                {
+                    if ($column->index)
+                        $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
+                }
+                
                 $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
                 
                 $data = array();
                 foreach ($ea->getObjectChangeSet($uow, $object) as $field => $changes) {
-                    if (!$changes[1] || !in_array($field, array_keys($config['columns']))) {
+                    $value = $changes[1];
+                    if (!$value || !in_array($field, array_keys($config['columns']))) {
                         continue;
                     }
-                    $data[$config['columns'][$field]->column] = $changes[1];
+                    
+                    if ($meta->isSingleValuedAssociation($field) && $value) {
+                        $wrappedAssoc = AbstractWrapper::wrap($value, $om);
+                        $metaAssoc = $wrappedAssoc->getMetadata();
+                        if ($configAssoc = $this->getConfiguration($om, $metaAssoc->name)) {
+                            
+                            foreach($configAssoc['columns'] as $fieldAssoc => $columnAssoc)
+                            {
+                                if ($columnAssoc->index)
+                                    $relatedId = $metaAssoc->getReflectionProperty($fieldAssoc)->getValue($value);
+                            }
+                            $data[$config['columns'][$field]->column] = $relatedId;
+                        }
+                        else
+                        {
+                            throw new RuntimeException("CartoDBLink: you are presisting a relation value to an entity which has no link.
+                                    When linking relations, both source and target entities need to be linked.");
+                        }
+                    }
+                    else
+                    {
+                        $data[$config['columns'][$field]->column] = $value;
+                    }
                 }
                 
                 if(count($data) == 0)
@@ -65,13 +102,6 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     //nothing to update
                     continue;
                 }
-                
-                foreach($config['columns'] as $field => $column)
-                {
-                    if ($column->index)
-                        $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
-                }
-                
                 $payload = $connection->updateRow($config['table'], $cartodbid, $data);
             }
         }
@@ -87,11 +117,37 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
                 
                 $data = array();
+                $thisPendingRelatedObjects = array();
                 foreach ($ea->getObjectChangeSet($uow, $object) as $field => $changes) {
                     if (!$changes[1] || !in_array($field, array_keys($config['columns']))) {
                         continue;
                     }
-                    $data[$config['columns'][$field]->column] = $changes[1];
+                    $value = $changes[1];
+                    if ($meta->isSingleValuedAssociation($field) && $value) {
+                        $oid = spl_object_hash($value);
+                        $wrappedAssoc = AbstractWrapper::wrap($value, $om);
+                        $metaAssoc = $wrapped->getMetadata();
+                        if ($configAssoc = $this->getConfiguration($om, $metaAssoc->name)) {
+                            //parent object has configuration, so we might need to keep it
+                            $value = $wrappedAssoc->getIdentifier(false);
+                            if (!is_array($value) && !$value) {
+                                $thisPendingRelatedObjects[$oid][] = array(
+                                        'connection' => $config['connection'],
+                                        'table' => $config['table'],
+                                        'field' => $config['columns'][$field]->column,
+                                );
+                            }
+                        }
+                        else
+                        {
+                            throw new RuntimeException("CartoDBLink: you are presisting a relation value to an entity which has no link.
+                                    When linking relations, both source and target entities need to be linked.");
+                        }
+                    }
+                    else
+                    {
+                        $data[$config['columns'][$field]->column] = $value;
+                    }
                 }
                 $index = null;
                 foreach($config['columns'] as $field => $column)
@@ -109,6 +165,14 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 $objectId = $wrapped->getIdentifier();
                 if (!$objectId) {
                     $this->pendingInserts[spl_object_hash($object)] = $row->cartodb_id;
+                    foreach($thisPendingRelatedObjects as $oid => $pendingRelatedObjectList)
+                    {
+                        foreach($pendingRelatedObjectList as $key => $pendingRelatedObject)
+                        {
+                            $pendingRelatedObject['cartodbid'] = $row->cartodb_id;
+                            $this->pendingRelatedObjects[$oid][] = $pendingRelatedObject;
+                        }
+                    }
                 }
             }
         }
@@ -144,50 +208,6 @@ class CartoDBLinkListener extends MappedEventSubscriber
         );
     }
 
-/**
-     * After object is loaded, listener updates the translations
-     * by currently used locale
-     *
-     * @param EventArgs $args
-     * @return void
-     */
-    public function postLoad(EventArgs $args)
-    {
-        $ea = $this->getEventAdapter($args);
-        $om = $ea->getObjectManager();
-        $object = $ea->getObject();
-        $meta = $om->getClassMetadata(get_class($object));
-        $config = $this->getConfiguration($om, $meta->name);
-        if ($config = $this->getConfiguration($om, $meta->name)) {
-            if (!in_array("fetch", $config['cascade']) && !in_array("all", $config['cascade']))
-                return;
-            
-            $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
-            
-            $data = array();
-            foreach($config['columns'] as $field => $column)
-            {
-                if ($column->index)
-                    $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
-                elseif($column->strong)
-                    $data[$field] = $column->column;
-            }
-            
-            if(!$cartodbid)
-                return;
-            
-            $payload = $connection->getRowsForColumns($config['table'], $data, array('cartodb_id' => $cartodbid));
-            $payloadData = $payload->getData();
-            $row = reset($payloadData);
-            
-            foreach($data as $field => $column)
-            {
-                $meta->getReflectionProperty($field)->setValue($object, $row->$column);
-            }
-            
-        }
-    }
-
     /**
      * Checks for inserted object to update its cartodb entry
      * foreign key
@@ -219,6 +239,69 @@ class CartoDBLinkListener extends MappedEventSubscriber
             
             $payload = $connection->updateRow($config['table'], $this->pendingInserts[$oid], array($index => $id));
             unset($this->pendingInserts[$oid]);
+        }
+        if ($this->pendingRelatedObjects && array_key_exists($oid, $this->pendingRelatedObjects)) {
+            $wrapped = AbstractWrapper::wrap($object, $om);
+            $meta = $wrapped->getMetadata();
+            $config = $this->getConfiguration($om, $meta->name);
+            $identifiers = $wrapped->getIdentifier(false);
+            foreach ($this->pendingRelatedObjects[$oid] as $configAssoc) {
+                $id = $wrapped->getIdentifier();
+                
+                foreach($config['columns'] as $field => $column)
+                {
+                    if ($column->index)
+                        $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
+                }
+                
+                $connection = $this->container->get("simbiotica.cartodb_connection.".$configAssoc['connection']);
+                $payload = $connection->updateRow($configAssoc['table'], $configAssoc['cartodbid'], array($configAssoc['field'] => $cartodbid));
+            }
+            unset($this->pendingRelatedObjects[$oid]);
+        }
+    }
+    
+    /**
+     * After object is loaded, listener updates the translations
+     * by currently used locale
+     *
+     * @param EventArgs $args
+     * @return void
+     */
+    public function postLoad(EventArgs $args)
+    {
+        $ea = $this->getEventAdapter($args);
+        $om = $ea->getObjectManager();
+        $object = $ea->getObject();
+        $meta = $om->getClassMetadata(get_class($object));
+        $config = $this->getConfiguration($om, $meta->name);
+        if ($config = $this->getConfiguration($om, $meta->name)) {
+            if (!in_array("fetch", $config['cascade']) && !in_array("all", $config['cascade']))
+                return;
+    
+            $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
+    
+            $data = array();
+            foreach($config['columns'] as $field => $column)
+            {
+                if ($column->index)
+                    $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
+                elseif($column->strong)
+                $data[$field] = $column->column;
+            }
+    
+            if(!$cartodbid)
+                return;
+    
+            $payload = $connection->getRowsForColumns($config['table'], $data, array('cartodb_id' => $cartodbid));
+            $payloadData = $payload->getData();
+            $row = reset($payloadData);
+    
+            foreach($data as $field => $column)
+            {
+                $meta->getReflectionProperty($field)->setValue($object, $row->$column);
+            }
+    
         }
     }
     
