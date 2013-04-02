@@ -144,6 +144,23 @@ abstract class Connection
     
         return $this->runSql($sql);
     }
+    
+    /**
+     * API v2 - Not officialy supported
+     *
+     * Deletes all rows from a table
+     *
+     * @param unknown $table Table name
+     */
+    public function truncateTable($table, $restartId = true)
+    {
+        if ($restartId)
+            $sql = sprintf("TRUNCATE TABLE %s RESTART IDENTITY", $table);
+        else
+            $sql = sprintf("TRUNCATE TABLE %s CONTINUE IDENTITY", $table);
+    
+        return $this->runSql($sql);
+    }
 
     /**
      * API v2 - Not officialy supported
@@ -246,6 +263,8 @@ abstract class Connection
                 $values[$key] = sprintf('%s', $elem?'1':'0');
             elseif (is_string($elem))
                 $values[$key] = sprintf('\'%s\'', pg_escape_string($elem));
+            elseif ($elem instanceof \DateTime)
+                $values[$key] = sprintf('\'%s\'', $elem->format('Y-m-d\TH:i:sP'));
         }
         $valuesString = implode(',', $values);
         
@@ -285,6 +304,14 @@ abstract class Connection
         return $this->runSql($sql);
     }
 
+    /**
+     * API v2
+     * 
+     * Delete row with given id from table
+     * 
+     * @param unknown $table The name of table
+     * @param unknown $row_id Cartobd_id of the row to delete
+     */
     public function deleteRow($table, $row_id)
     {
         $sql = "DELETE FROM $table WHERE cartodb_id = $row_id;";
@@ -295,7 +322,7 @@ abstract class Connection
      * API v2
      * 
      * Gets all the records of a defined table.
-     * @param $table the name of table
+     * @param $table The name of table
      * @param $params array of parameters.
      *   Valid parameters:
      *   - 'rows_per_page' : Number of rows per page.

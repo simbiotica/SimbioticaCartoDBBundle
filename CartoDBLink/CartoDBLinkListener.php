@@ -69,7 +69,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 $data = array();
                 foreach ($ea->getObjectChangeSet($uow, $object) as $field => $changes) {
                     $value = $changes[1];
-                    if (!$value || !in_array($field, array_keys($config['columns']))) {
+                    if (!$value || !in_array($field, array_keys($config['columns'])) || empty($config['columns'][$field]->set)) {
                         continue;
                     }
                     
@@ -93,7 +93,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     }
                     else
                     {
-                        $data[$config['columns'][$field]->column] = $value;
+                        $data[$config['columns'][$field]->column] = sprintf($config['columns'][$field]->set, $value);
                     }
                 }
                 
@@ -119,7 +119,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 $data = array();
                 $thisPendingRelatedObjects = array();
                 foreach ($ea->getObjectChangeSet($uow, $object) as $field => $changes) {
-                    if (!$changes[1] || !in_array($field, array_keys($config['columns']))) {
+                    if (!$changes[1] || !in_array($field, array_keys($config['columns'])) || empty($config['columns'][$field]->set)) {
                         continue;
                     }
                     $value = $changes[1];
@@ -146,7 +146,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     }
                     else
                     {
-                        $data[$config['columns'][$field]->column] = $value;
+                        $data[$config['columns'][$field]->column] = sprintf($config['columns'][$field]->set, $value);
                     }
                 }
                 $index = null;
@@ -284,10 +284,12 @@ class CartoDBLinkListener extends MappedEventSubscriber
             $data = array();
             foreach($config['columns'] as $field => $column)
             {
-                if ($column->index)
+                if (empty($column->get))
+                    continue;
+                elseif ($column->index)
                     $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
                 elseif($column->strong)
-                $data[$field] = $column->column;
+                    $data[$field] = sprintf($config['columns'][$field]->get, $column->column);
             }
     
             if(!$cartodbid)

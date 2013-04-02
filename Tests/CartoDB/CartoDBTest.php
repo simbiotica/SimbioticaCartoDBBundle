@@ -16,7 +16,7 @@ class CalculatorTest extends WebTestCase
                 'name' => 'text',
                 'description' => 'text',
                 'somenumber' => 'numeric',
-                'somedate' => 'date'
+                'somedate' => 'timestamp without time zone'
         );
         
         $client = static::createClient();
@@ -48,9 +48,9 @@ class CalculatorTest extends WebTestCase
         foreach($columnData as $column)
         {
             if ($column->column_name == 'cartodb_id')
-                $this->assertTrue($column->data_type == 'integer');
+                $this->assertEquals($column->data_type, 'integer');
             else
-                $this->assertTrue($schema[$column->column_name] == $column->data_type);
+                $this->assertEquals($schema[$column->column_name], $column->data_type);
         }
         $columnNames = array_map(function($item){return $item->column_name;}, $columnData);
         $this->assertContains('cartodb_id', $columnNames);
@@ -85,6 +85,36 @@ class CalculatorTest extends WebTestCase
         //Columns can be removed
         $privateClient->dropColumn($table, 'someothercolumnnewname');
         $this->assertFalse(in_array('someothercolumnnewname', array_map(function($item){return $item->column_name;}, $privateClient->showTable($table, true)->getData())));
+        
+        //Table is empty
+        $privateClient->getAllRows($table);
+        $this->assertEquals(0, $privateClient->getAllRows($table)->getRowCount());
+        
+        //Rows can be inserted
+        $row1 = array(
+                'name' => 'name of test row 1',
+                'description' => 'description of test row 1',
+                'somenumber' => 111,
+                'somedate' => new \DateTime(),
+        );
+        $privateClient->insertRow($table, $row1);
+        $payload = $privateClient->getAllRows($table);
+        $this->assertEquals(1, $payload->getRowCount());
+        $data = $payload->getData();
+        foreach(reset($data) as $name => $value)
+        {
+            if ($name == 'cartodb_id')
+                $this->assertGreaterThanOrEqual(1, $value);
+            else
+                $this->assertEquals($row1[$name], $value);
+        }
+        
+//         $privateClient->insertRow($table, $data)
+//         $privateClient->updateRow($table, $row_id, $data)
+//         $privateClient->deleteRow($table, $row_id)
+//         $privateClient->truncateTable($table)
+        
+        
         
         //Tables can be deleted
         $privateClient->dropTable($table);

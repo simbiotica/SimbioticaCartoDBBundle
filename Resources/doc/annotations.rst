@@ -90,6 +90,20 @@ manipulating this field yourself.
 the value received from CartoDB for this field will override the one available
 on the current database. The value stored in the local database will only be
 overwritten if you save the changes afterwards. 
+- set(optional, default: '%s'): when uploading data to the CartoDB instance,
+this formated string will be used. Use it if you want to use PostgreSQL functions, 
+like "count(%s)". If set to null, column will be ignored on set operations.
+- get(optional, default: '%s'): similar to the "set" option, but used when fetching.
+
+Using relations as CartoDBColumns
+`````````````````````````````````
+
+If you wish to, you can also map you 1:n relations to CartoDB. To do so, you
+just need to set both entities as CartoDBLink'ed and mark the foreign key column
+as CartoDBColumn. The relation will be recreated on the server using cartodb_id
+and not the local index or the linking index, meaning the relation will still
+make sense in your CartoDB instance even if you decouple it from your Symfony2
+project.
 
 
 Some features you might miss
@@ -99,7 +113,5 @@ Some of them will be implemented in a near future, others in a not-so-near
 future, others in your future (aka submit a PR with them):
 - Syncing only works for fields managed by Doctrine. Syncing for non-doctrine
 managed fields is high up on my TODO list
-- Unidirectional references, for when you can't / don't want to change one
-of the DBs.
 - XML and YAML class configuration
 - (some other stuff)
