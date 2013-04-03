@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "description": "CartoDB SQL API integration for Symfony2",
     "keywords": ["cartodb"],
-    "homepage": "http://github.com/tiagojsag/SimbioticaCartoDBBundle",
+    "homepage": "http://github.com/simbiotica/SimbioticaCartoDBBundle",
     "license": "MIT",
     "authors": [
         {
@@ -16,6 +16,7 @@
     "require": {
         "php": ">=5.3.3",
         "symfony/framework-bundle": ">=2.2,<2.3-dev",
+        "simbiotica/cartodbclient-php": "*",
         "doctrine/orm": "~2.2,>=2.2.3",
         "eher/oauth": "dev-master",
         "gedmo/doctrine-extensions": "dev-master"

@@ -6,6 +6,8 @@
 
 namespace Simbiotica\CartoDBBundle\CartoDB;
 
+use Simbiotica\CartoDBClient\PublicConnection;
+use Simbiotica\CartoDBClient\PrivateConnection;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class ConnectionFactory
@@ -22,7 +24,8 @@ class ConnectionFactory
      */
     public function createPrivateConnection($subdomain, $apiKey, $consumerKey, $consumerSecret, $email, $password)
     {
-        return new PrivateConnection($this->session, $subdomain, $apiKey, $consumerKey, $consumerSecret, $email, $password);
+        $storage = new SymfonySessionStorage($this->session, $subdomain);
+        return new PrivateConnection($storage, $subdomain, $apiKey, $consumerKey, $consumerSecret, $email, $password);
     }
     
     /**
@@ -30,7 +33,8 @@ class ConnectionFactory
      */
     public function createPublicConnection($subdomain)
     {
-        return new PublicConnection($this->session, $subdomain);
+        $storage = new SymfonySessionStorage($this->session, $subdomain);
+        return new PublicConnection($storage, $subdomain);
     }
 }
 

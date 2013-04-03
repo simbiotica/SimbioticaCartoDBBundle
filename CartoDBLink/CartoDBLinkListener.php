@@ -3,7 +3,6 @@
 namespace Simbiotica\CartoDBBundle\CartoDBLink;
 
 use Gedmo\Tool\Wrapper\AbstractWrapper;
-
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Event\PostFlushEventArgs;
