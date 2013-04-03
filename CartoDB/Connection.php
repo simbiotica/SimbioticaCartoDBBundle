@@ -296,6 +296,8 @@ abstract class Connection
                 $values[$key] = sprintf('%s', $elem?'1':'0');
             elseif (is_string($elem))
                 $values[$key] = sprintf('\'%s\'', $elem);
+            elseif ($elem instanceof \DateTime)
+                $values[$key] = sprintf('\'%s\'', $elem->format('Y-m-d\TH:i:sP'));
         }
         $valuesString = implode(',', $values);
         

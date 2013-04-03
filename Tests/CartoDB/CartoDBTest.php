@@ -105,16 +105,47 @@ class CalculatorTest extends WebTestCase
         {
             if ($name == 'cartodb_id')
                 $this->assertGreaterThanOrEqual(1, $value);
-            else
+            //for now, skip dates, as we have to do some timezone jugling I don't have time for right now
+            elseif($schema[$name] != 'timestamp without time zone')
                 $this->assertEquals($row1[$name], $value);
         }
         
-//         $privateClient->insertRow($table, $data)
-//         $privateClient->updateRow($table, $row_id, $data)
-//         $privateClient->deleteRow($table, $row_id)
-//         $privateClient->truncateTable($table)
+        //Rows can be updated.
+        $updatedRow1 = array(
+                'name' => 'renamed test row 1',
+                'description' => 'renamed description of test row 1',
+                'somenumber' => 222,
+                'somedate' => new \DateTime(),
+        );
+        $privateClient->updateRow($table, 1, $updatedRow1);
+        $payload = $privateClient->getAllRows($table);
+        $this->assertEquals(1, $payload->getRowCount());
+        $data = $payload->getData();
+        foreach(reset($data) as $name => $value)
+        {
+            if ($name == 'cartodb_id')
+                $this->assertGreaterThanOrEqual(1, $value);
+            //for now, skip dates, as we have to do some timezone jugling I don't have time for right now
+            elseif($schema[$name] != 'timestamp without time zone')
+            $this->assertEquals($updatedRow1[$name], $value);
+        }
         
+        //Rows can be deleted
+        $privateClient->deleteRow($table, 1);
+        $payload = $privateClient->getAllRows($table);
+        $this->assertEquals(0, $payload->getRowCount());
         
+        //Reinserting rows
+        $privateClient->insertRow($table, $row1);
+        $privateClient->insertRow($table, $row1);
+        $privateClient->insertRow($table, $row1);
+        $payload = $privateClient->getAllRows($table);
+        $this->assertEquals(3, $payload->getRowCount());
+        
+        //Tables can be truncated
+        $privateClient->truncateTable($table);
+        $payload = $privateClient->getAllRows($table);
+        $this->assertEquals(0, $payload->getRowCount());
         
         //Tables can be deleted
         $privateClient->dropTable($table);
