@@ -18,7 +18,6 @@
         "symfony/framework-bundle": ">=2.2,<2.3-dev",
         "simbiotica/cartodbclient-php": "1.0.*@beta",
         "doctrine/orm": "~2.2,>=2.2.3",
-        "eher/oauth": "dev-master",
         "gedmo/doctrine-extensions": "dev-master"
     },
     "require-dev": {
