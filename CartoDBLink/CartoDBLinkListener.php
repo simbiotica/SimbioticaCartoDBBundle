@@ -66,9 +66,10 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
                 
                 $data = array();
+                $transformers = array();
                 foreach ($ea->getObjectChangeSet($uow, $object) as $field => $changes) {
                     $value = $changes[1];
-                    if (!$value || !in_array($field, array_keys($config['columns'])) || empty($config['columns'][$field]->set)) {
+                    if ( !in_array($field, array_keys($config['columns'])) || empty($config['columns'][$field]->set)) {
                         continue;
                     }
                     
@@ -92,7 +93,8 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     }
                     else
                     {
-                        $data[$config['columns'][$field]->column] = sprintf($config['columns'][$field]->set, $value);
+                        $data[$config['columns'][$field]->column] = $value;
+                        if($config['columns'][$field]->set != '%s') $transformers[$config['columns'][$field]->column] = $config['columns'][$field]->set;
                     }
                 }
                 
@@ -101,7 +103,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     //nothing to update
                     continue;
                 }
-                $payload = $connection->updateRow($config['table'], $cartodbid, $data);
+                $payload = $connection->updateRow($config['table'], $cartodbid, $data, $transformers);
             }
         }
         // on insertion
@@ -116,9 +118,10 @@ class CartoDBLinkListener extends MappedEventSubscriber
                 $connection = $this->container->get("simbiotica.cartodb_connection.".$config['connection']);
                 
                 $data = array();
+                $transformers = array();
                 $thisPendingRelatedObjects = array();
                 foreach ($ea->getObjectChangeSet($uow, $object) as $field => $changes) {
-                    if (!$changes[1] || !in_array($field, array_keys($config['columns'])) || empty($config['columns'][$field]->set)) {
+                    if (!in_array($field, array_keys($config['columns'])) || empty($config['columns'][$field]->set)) {
                         continue;
                     }
                     $value = $changes[1];
@@ -145,7 +148,8 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     }
                     else
                     {
-                        $data[$config['columns'][$field]->column] = sprintf($config['columns'][$field]->set, $value);
+                        $data[$config['columns'][$field]->column] = $value;
+                        if($config['columns'][$field]->set != '%s') $transformers[$config['columns'][$field]->column] = $config['columns'][$field]->set;
                     }
                 }
                 $index = null;
@@ -155,7 +159,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                         $index = $field;
                 }
                 
-                $payload = $connection->insertRow($config['table'], $data);
+                $payload = $connection->insertRow($config['table'], $data, $transformers);
                 $payloadData = $payload->getData();
                 $row = reset($payloadData);
                 $meta->getReflectionProperty($index)->setValue($object, $row->cartodb_id);
@@ -298,11 +302,13 @@ class CartoDBLinkListener extends MappedEventSubscriber
             $payloadData = $payload->getData();
             $row = reset($payloadData);
     
-            foreach($data as $field => $column)
+            if ($row)
             {
-                $meta->getReflectionProperty($field)->setValue($object, $row->$column);
+                foreach($data as $field => $column)
+                {
+                    $meta->getReflectionProperty($field)->setValue($object, $row->$column);
+                }
             }
-    
         }
     }
     
