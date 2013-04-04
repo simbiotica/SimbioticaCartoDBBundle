@@ -16,7 +16,7 @@
     "require": {
         "php": ">=5.3.3",
         "symfony/framework-bundle": ">=2.2,<2.3-dev",
-        "simbiotica/cartodbclient-php": "dev-master",
+        "simbiotica/cartodbclient-php": "1.0.*@beta",
         "doctrine/orm": "~2.2,>=2.2.3",
         "eher/oauth": "dev-master",
         "gedmo/doctrine-extensions": "dev-master"
@@ -28,6 +28,5 @@
     "autoload": {
         "psr-0": { "Simbiotica\\CartoDBBundle": "" }
     },
-    "minimum-stability": "dev",
     "target-dir": "Simbiotica/CartoDBBundle"
 }
