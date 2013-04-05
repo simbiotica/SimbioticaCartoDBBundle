@@ -34,6 +34,10 @@ class Annotation extends AbstractAnnotationDriver
                 }
             }
         }
+        else {
+            //if no CartoDBLink is found, just quit. This will allow easy commenting of CartoDB Annotations by just commenting the CartoDBLink
+            return;
+        }
         
         $index = false;
         // property annotations
