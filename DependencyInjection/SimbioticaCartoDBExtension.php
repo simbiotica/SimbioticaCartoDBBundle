@@ -62,9 +62,9 @@ class SimbioticaCartoDBExtension extends Extension
             $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection_private'))
             ->setArguments(array(
                     $connection['subdomain'],
-                    $connection['api_key'],
-                    $connection['consumer_key'],
-                    $connection['consumer_secret'],
+                    array_key_exists('api_key', $connection)?$connection['api_key']:null,
+                    array_key_exists('consumer_key', $connection)?$connection['consumer_key']:null,
+                    array_key_exists('consumer_secret', $connection)?$connection['consumer_secret']:null,
                     $connection['email'],
                     $connection['password']
             ));
