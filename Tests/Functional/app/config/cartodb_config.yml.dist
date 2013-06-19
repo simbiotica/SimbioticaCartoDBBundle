@@ -4,8 +4,8 @@ simbiotica_carto_db:
     connections:
         private:
             private: true
-            key:
-            secret:
+            consumer_key:
+            consumer_secret:
             subdomain:
             email:
             password:
@@ -14,8 +14,8 @@ simbiotica_carto_db:
             subdomain:
         private_fail:
             private: true
-            key: foo
-            secret: foo
+            consumer_key: foo
+            consumer_secret: foo
             subdomain: foo
             email: foo
             password: foo
