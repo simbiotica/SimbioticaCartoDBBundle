@@ -48,49 +48,46 @@ class CalculatorTest extends WebTestCase
 //        $privateClient->createTable($table, $schema);
 //        $tableNames = $privateClient->getTableNames()->getData();
 //        $this->assertContains($table, array_map(function($item){return $item->relname;}, $tableNames), 'Created table should exist after created');
-//        
-//        //Table has the right columns
-//        $columnData = $privateClient->showTable($table, true)->getData();
-//        foreach($columnData as $column)
-//        {
-//            if ($column->column_name == 'cartodb_id')
-//                $this->assertEquals($column->data_type, 'integer', 'Created columns should have the correct data types');
-//            else
-//                $this->assertEquals($schema[$column->column_name], $column->data_type, 'Created columns should have the correct data types');
-//        }
-//        $columnNames = array_map(function($item){return $item->column_name;}, $columnData);
-//        $this->assertContains('cartodb_id', $columnNames, 'Created table should have the correct column names');
-//        $this->assertContains('name', $columnNames, 'Created table should have the correct column names');
-//        $this->assertContains('description', $columnNames, 'Created table should have the correct column names');
-//        $this->assertContains('somenumber', $columnNames, 'Created table should have the correct column names');
-//        $this->assertContains('somedate', $columnNames, 'Created table should have the correct column names');
-//        
-//        //Table doesn't have columns it shouldn't
-//        if (in_array('someothercolumn', $columnNames))
-//            $privateClient->dropColumn($table, 'someothercolumn');
-//        $this->assertFalse(in_array('someothercolumn', array_map(function($item){return $item->column_name;}, $privateClient->showTable($table, true)->getData())), 'Created table shouldnt have extra columns');
-//        
-//        //Columns can be added
-//        $privateClient->addColumn($table, 'someothercolumn', 'date');
-//        $this->assertTrue(in_array('someothercolumn', array_map(function($item){return $item->column_name;}, $privateClient->showTable($table, true)->getData())), 'Added columns should be present');
-//        
-//        //Column names can be changed
-//        $privateClient->changeColumnName($table, 'someothercolumn', 'someothercolumnnewname');
-//        $this->assertTrue(in_array('someothercolumnnewname', array_map(function($item){return $item->column_name;}, $privateClient->showTable($table, true)->getData())), 'Renamed columns should have new name');
-//        $this->assertFalse(in_array('someothercolumn', array_map(function($item){return $item->column_name;}, $privateClient->showTable($table, true)->getData())), 'Renamed columns shouldnt have old name');
-//        
-//        //Column types can be changed
-//        $privateClient->changeColumnType($table, 'someothercolumnnewname', 'text');
-//        $columnData = $privateClient->showTable($table, true)->getData();
-//        foreach($columnData as $column)
-//        {
-//            if ($column->column_name == 'someothercolumnnewname')
-//                $this->assertTrue($column->data_type == 'text', 'Columns with changed data types must have new data type');
-//        }
-//        
-//        //Columns can be removed
-//        $privateClient->dropColumn($table, 'someothercolumnnewname');
-//        $this->assertFalse(in_array('someothercolumnnewname', array_map(function($item){return $item->column_name;}, $privateClient->showTable($table, true)->getData())), 'Removed columns shouldnt exist afterwards');
+        
+        //Table has the right columns
+        $columnNames = array_map(function($item){return $item->cdb_columnnames;}, $privateClient->getColumnNames($table)->getData());
+        $this->assertContains('cartodb_id', $columnNames);
+        $this->assertContains('name', $columnNames);
+        $this->assertContains('description', $columnNames);
+        $this->assertContains('somenumber', $columnNames);
+        $this->assertContains('somedate', $columnNames);
+        
+        foreach($columnNames as $columnName)
+        {
+            $columnType = array_pop($privateClient->getColumnType($table, $columnName)->getData())->cdb_columntype;
+
+            if ($columnName == 'cartodb_id')
+                $this->assertEquals($columnType, 'integer');
+            else
+                $this->assertEquals($schema[$columnName], $columnType);
+        }
+        
+        //Table doesn't have columns it shouldn't
+        if (in_array('someothercolumn', $columnNames))
+            $privateClient->dropColumn($table, 'someothercolumn');
+        $this->assertFalse(in_array('someothercolumn', array_map(function($item){return $item->cdb_columnnames;}, $privateClient->getColumnNames($table)->getData())));
+        
+        //Columns can be added
+        $privateClient->addColumn($table, 'someothercolumn', 'date');
+        $this->assertTrue(in_array('someothercolumn', array_map(function($item){return $item->cdb_columnnames;}, $privateClient->getColumnNames($table)->getData())));
+        
+        //Column names can be changed
+        $privateClient->changeColumnName($table, 'someothercolumn', 'someothercolumnnewname');
+        $this->assertTrue(in_array('someothercolumnnewname', array_map(function($item){return $item->cdb_columnnames;}, $privateClient->getColumnNames($table)->getData())));
+        $this->assertFalse(in_array('someothercolumn', array_map(function($item){return $item->cdb_columnnames;}, $privateClient->getColumnNames($table)->getData())));
+        
+        //Column types can be changed
+        $privateClient->changeColumnType($table, 'someothercolumnnewname', 'text');
+        $this->assertEquals('text', array_pop($privateClient->getColumnType($table, 'someothercolumnnewname')->getData())->cdb_columntype);;
+        
+        //Columns can be removed
+        $privateClient->dropColumn($table, 'someothercolumnnewname');
+        $this->assertFalse(in_array('someothercolumnnewname', array_map(function($item){return $item->cdb_columnnames;}, $privateClient->getColumnNames($table)->getData())));
         
         //Table is empty
         $privateClient->getAllRows($table);

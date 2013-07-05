@@ -264,13 +264,6 @@ class CartoDBLinkListener extends MappedEventSubscriber
         }
     }
     
-    /**
-     * After object is loaded, listener updates the translations
-     * by currently used locale
-     *
-     * @param EventArgs $args
-     * @return void
-     */
     public function postLoad(EventArgs $args)
     {
         $ea = $this->getEventAdapter($args);
