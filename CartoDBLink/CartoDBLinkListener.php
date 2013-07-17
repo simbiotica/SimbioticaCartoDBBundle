@@ -131,13 +131,22 @@ class CartoDBLinkListener extends MappedEventSubscriber
                         $metaAssoc = $wrapped->getMetadata();
                         if ($configAssoc = $this->getConfiguration($om, $metaAssoc->name)) {
                             //parent object has configuration, so we might need to keep it
-                            $value = $wrappedAssoc->getIdentifier(false);
-                            if (!is_array($value) && !$value) {
+                            $identifier = $wrappedAssoc->getIdentifier(false);
+                            if (!is_array($identifier) && !$identifier) {
                                 $thisPendingRelatedObjects[$oid][] = array(
                                         'connection' => $config['connection'],
                                         'table' => $config['table'],
                                         'field' => $config['columns'][$field]->column,
                                 );
+                            }
+                            else
+                            {
+                                foreach($configAssoc['columns'] as $fieldAssoc => $columnAssoc)
+                                {
+                                    if ($columnAssoc->index)
+                                        $relatedId = $metaAssoc->getReflectionProperty($fieldAssoc)->getValue($value);
+                                }
+                                $data[$config['columns'][$field]->column] = $relatedId;
                             }
                         }
                         else

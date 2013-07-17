@@ -80,20 +80,20 @@ CartoDBColumn
 ~~~~~~~~~~~~~
 
 States which columns will be synced
-- column (required) : the name of the column in CartoDB table to which this
+* column (required) : the name of the column in CartoDB table to which this
 field will be mapped
-- index (optional, default: false, one per entity is needed) : if true, this
+* index (optional, default: false, one per entity is needed) : if true, this
 field will be used locally to store cartodb_id, and remotely to store the
 local id. Unless you have a really good reason to do so, you should avoid
 manipulating this field yourself.
-- strong(optional, default: false): if set to true, when loading the object,
+* strong(optional, default: false): if set to true, when loading the object,
 the value received from CartoDB for this field will override the one available
 on the current database. The value stored in the local database will only be
 overwritten if you save the changes afterwards. 
-- set(optional, default: '%s'): when uploading data to the CartoDB instance,
+* set(optional, default: '%s'): when uploading data to the CartoDB instance,
 this formated string will be used. Use it if you want to use PostgreSQL functions, 
 like "count(%s)". If set to null, column will be ignored on set operations.
-- get(optional, default: '%s'): similar to the "set" option, but used when fetching.
+* get(optional, default: '%s'): similar to the "set" option, but used when fetching.
 
 Using relations as CartoDBColumns
 `````````````````````````````````
@@ -111,7 +111,7 @@ Some features you might miss
 
 Some of them will be implemented in a near future, others in a not-so-near
 future, others in your future (aka submit a PR with them):
-- Syncing only works for fields managed by Doctrine. Syncing for non-doctrine
+* Syncing only works for fields managed by Doctrine. Syncing for non-doctrine
 managed fields is high up on my TODO list
-- XML and YAML class configuration
-- (some other stuff)
+* XML and YAML class configuration
+* (some other stuff)
