@@ -88,8 +88,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                         }
                         else
                         {
-                            throw new RuntimeException("CartoDBLink: you are presisting a relation value to an entity which has no link.
-                                    When linking relations, both source and target entities need to be linked.");
+                            $data[$config['columns'][$field]->column] = $wrappedAssoc->getIdentifier(true);
                         }
                     }
                     else
@@ -129,7 +128,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                     if ($meta->isSingleValuedAssociation($field) && $value) {
                         $oid = spl_object_hash($value);
                         $wrappedAssoc = AbstractWrapper::wrap($value, $om);
-                        $metaAssoc = $wrapped->getMetadata();
+                        $metaAssoc = $wrappedAssoc->getMetadata();
                         if ($configAssoc = $this->getConfiguration($om, $metaAssoc->name)) {
                             //parent object has configuration, so we might need to keep it
                             $identifier = $wrappedAssoc->getIdentifier(false);
@@ -152,8 +151,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                         }
                         else
                         {
-                            throw new RuntimeException("CartoDBLink: you are presisting a relation value to an entity which has no link.
-                                    When linking relations, both source and target entities need to be linked.");
+                            $data[$config['columns'][$field]->column] = $wrappedAssoc->getIdentifier(true);
                         }
                     }
                     else
