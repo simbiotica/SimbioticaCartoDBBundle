@@ -20,31 +20,31 @@ Installation
 Add the bundle to your composer.json
 
 .. code-block:: javascript
-{
-    "require": {
-        "simbiotica/cartodb-bundle": "dev-master",
-    }
-}
+  {
+      "require": {
+          "simbiotica/cartodb-bundle": "dev-master",
+      }
+  }
 
 
 And tell composer to download it by running the command:
 
 .. code-block:: sh
 
-$ php composer.phar update simbiotica/cartodb-bundle
+  $ php composer.phar update simbiotica/cartodb-bundle
 
 
 Next, enable it in you app/AppKernel.php
 
 .. code-block:: php
-<?php
-// app/AppKernel.php
-
-public function registerBundles()
-{
-    $bundles = array(
-        // ...
-        new Simbiotica\CartoDBBundle\SimbioticaCartoDBBundle(),
-    );
-}
+  <?php
+  // app/AppKernel.php
+  
+  public function registerBundles()
+  {
+      $bundles = array(
+          // ...
+          new Simbiotica\CartoDBBundle\SimbioticaCartoDBBundle(),
+      );
+  }
 
