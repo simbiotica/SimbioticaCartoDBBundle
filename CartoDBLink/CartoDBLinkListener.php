@@ -30,6 +30,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
 
     public function __construct(ContainerInterface $container)
     {
+        parent::__construct();
         $this->container = $container;
     }
     
@@ -260,10 +261,20 @@ class CartoDBLinkListener extends MappedEventSubscriber
             foreach ($this->pendingRelatedObjects[$oid] as $configAssoc) {
                 $id = $wrapped->getIdentifier();
                 
-                foreach($config['columns'] as $field => $column)
+                //check if entity is mapped
+                //if it is, get cartodb_id for that entity
+                //if not, use local id
+                if(array_key_exists('columns', $config))
                 {
-                    if ($column->index)
-                        $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
+                    foreach($config['columns'] as $field => $column)
+                    {
+                        if ($column->index)
+                            $cartodbid = $meta->getReflectionProperty($field)->getValue($object);
+                    }
+                }
+                else
+                {
+                    $cartodbid = $id;
                 }
                 
                 $connection = $this->container->get("simbiotica.cartodb_connection.".$configAssoc['connection']);
