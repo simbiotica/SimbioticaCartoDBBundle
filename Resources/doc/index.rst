@@ -3,6 +3,11 @@ SimbioticaCartoDBBundle
 
 CartoDB SQL API integration for Symfony2
 
+Before you start
+----------------
+
+Documentation pages are not rendered correctly on github, and some snippets may not
+be visible on the github page.
 
 Prerequisites
 -------------
