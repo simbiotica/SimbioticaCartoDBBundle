@@ -130,7 +130,7 @@ class CartoDBLinkListener extends MappedEventSubscriber
                         $wrappedAssoc = AbstractWrapper::wrap($value, $om);
                         $metaAssoc = $wrappedAssoc->getMetadata();
                         if ($configAssoc = $this->getConfiguration($om, $metaAssoc->name)) {
-                            //parent object has configuration, so we might need to keep it
+                            //related entity has configuration, so we might need to keep it
                             $identifier = $wrappedAssoc->getIdentifier(false);
                             if (!is_array($identifier) && !$identifier) {
                                 $thisPendingRelatedObjects[$oid][] = array(
@@ -151,7 +151,19 @@ class CartoDBLinkListener extends MappedEventSubscriber
                         }
                         else
                         {
-                            $data[$config['columns'][$field]->column] = $wrappedAssoc->getIdentifier(true);
+                            //related entity doesn't have configuration
+                            $identifier = $wrappedAssoc->getIdentifier(false);
+                            if (!is_array($identifier) && !$identifier) {
+                                $thisPendingRelatedObjects[$oid][] = array(
+                                        'connection' => $config['connection'],
+                                        'table' => $config['table'],
+                                        'field' => $config['columns'][$field]->column,
+                                );
+                            }
+                            else
+                            {
+                                $data[$config['columns'][$field]->column] = $wrappedAssoc->getIdentifier(true);
+                            }
                         }
                     }
                     else
