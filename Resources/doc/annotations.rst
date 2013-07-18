@@ -80,19 +80,24 @@ CartoDBColumn
 ~~~~~~~~~~~~~
 
 States which columns will be synced
+
 * column (required) : the name of the column in CartoDB table to which this
 field will be mapped
+
 * index (optional, default: false, one per entity is needed) : if true, this
 field will be used locally to store cartodb_id, and remotely to store the
 local id. Unless you have a really good reason to do so, you should avoid
 manipulating this field yourself.
+
 * strong(optional, default: false): if set to true, when loading the object,
 the value received from CartoDB for this field will override the one available
 on the current database. The value stored in the local database will only be
 overwritten if you save the changes afterwards. 
+
 * set(optional, default: '%s'): when uploading data to the CartoDB instance,
 this formated string will be used. Use it if you want to use PostgreSQL functions, 
 like "count(%s)". If set to null, column will be ignored on set operations.
+
 * get(optional, default: '%s'): similar to the "set" option, but used when fetching.
 
 Using relations as CartoDBColumns
@@ -107,8 +112,8 @@ synchronized with CartoDB. The relation will be recreated on the server using ca
 and not the local index, meaning the relation will still make sense in your
 CartoDB instance even if you decouple it from your Symfony2 project. The local foreign
 key value is not stored in the server on the related entity (but can still be made
-
 available on the entity itself, if you configured an index column on it).
+
 * Just one entity is synchronized: if just the entity that holds the foreign key
 is synchronized to CartoDB, its CartoDB corresponding entry will hold the local
 foreign key value, as no relation to another CartoDB entity can be established.
