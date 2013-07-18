@@ -1,7 +1,7 @@
 Annotations
 ===========
 
-If you wish to syncronize your local entities with CartoDB, you can do so
+If you wish to synchronize your local entities with CartoDB, you can do so
 using annotations
 
 WARNING
@@ -98,12 +98,20 @@ like "count(%s)". If set to null, column will be ignored on set operations.
 Using relations as CartoDBColumns
 `````````````````````````````````
 
-If you wish to, you can also map you 1:n relations to CartoDB. To do so, you
-just need to set both entities as CartoDBLink'ed and mark the foreign key column
-as CartoDBColumn. The relation will be recreated on the server using cartodb_id
-and not the local index or the linking index, meaning the relation will still
-make sense in your CartoDB instance even if you decouple it from your Symfony2
-project.
+If you wish to, you can also map you 1:n relations to CartoDB. To do so, just add
+the CartoDBLink annotation to the ManyToOne mapped field. This will result in one
+of two scenarios, depending on your synchronized entities:
+
+* Both entities are synchronized: in this scenario, both ends of the relation are
+synchronized with CartoDB. The relation will be recreated on the server using cartodb_id,
+and not the local index, meaning the relation will still make sense in your
+CartoDB instance even if you decouple it from your Symfony2 project. The local foreign
+key value is not stored in the server on the related entity (but can still be made
+
+available on the entity itself, if you configured an index column on it).
+* Just one entity is synchronized: if just the entity that holds the foreign key
+is synchronized to CartoDB, its CartoDB corresponding entry will hold the local
+foreign key value, as no relation to another CartoDB entity can be established.
 
 
 Some features you might miss
