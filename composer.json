@@ -15,9 +15,9 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "symfony/framework-bundle": ">=2.2,<2.4-dev",
+        "symfony/framework-bundle": "~2.3",
         "simbiotica/cartodbclient-php": "dev-master",
-        "doctrine/orm": "~2.2,<2.4-dev",
+        "doctrine/orm": "~2.2",
         "gedmo/doctrine-extensions": "dev-master"
     },
     "require-dev": {
