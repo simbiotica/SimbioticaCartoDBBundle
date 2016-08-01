@@ -22,10 +22,10 @@ class SimbioticaCartoDBExtension extends Extension
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
-        
-        $loader =  new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+
+        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
-        
+
         foreach ($config['orm'] as $name => $listeners) {
             foreach ($listeners as $ext => $enabled) {
                 $listener = sprintf('cartodb.listener.%s', $ext);
@@ -38,43 +38,50 @@ class SimbioticaCartoDBExtension extends Extension
 
             $this->entityManagers[$name] = $listeners;
         }
-        
+
         if (!empty($config['connections']) && is_array($config['connections'])) {
             foreach ($config['connections'] as $name => $connection) {
                 $this->loadConnection($name, $connection, $container);
             }
         }
-        
-        
+
+
     }
-    
+
     /**
      * Loads a configured DBAL connection.
      *
-     * @param string           $name       The name of the connection
-     * @param array            $connection A dbal connection configuration.
-     * @param ContainerBuilder $container  A ContainerBuilder instance
+     * @param string $name The name of the connection
+     * @param array $connection A dbal connection configuration.
+     * @param ContainerBuilder $container A ContainerBuilder instance
      */
     protected function loadConnection($name, array $connection, ContainerBuilder $container)
     {
-        if ($connection['private'])
-        {
-            $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection_private'))
-            ->setArguments(array(
-                    $connection['subdomain'],
-                    array_key_exists('api_key', $connection)?$connection['api_key']:null,
-                    array_key_exists('consumer_key', $connection)?$connection['consumer_key']:null,
-                    array_key_exists('consumer_secret', $connection)?$connection['consumer_secret']:null,
-                    $connection['email'],
-                    $connection['password']
-            ));
-        }
-        else
-        {
-            $configuration = $container->setDefinition(sprintf('simbiotica.cartodb_connection.%s', $name), new DefinitionDecorator('cartodb_connection_public'))
-            ->setArguments(array(
-                    $connection['subdomain']
-            ));
+        if ($connection['private']) {
+            $container->setDefinition(
+                sprintf('simbiotica.cartodb_connection.%s', $name),
+                new DefinitionDecorator('cartodb_connection_private')
+            )
+                ->setArguments(
+                    array(
+                        $connection['subdomain'],
+                        array_key_exists('api_key', $connection) ? $connection['api_key'] : null,
+                        array_key_exists('consumer_key', $connection) ? $connection['consumer_key'] : null,
+                        array_key_exists('consumer_secret', $connection) ? $connection['consumer_secret'] : null,
+                        $connection['email'],
+                        $connection['password'],
+                    )
+                );
+        } else {
+            $container->setDefinition(
+                sprintf('simbiotica.cartodb_connection.%s', $name),
+                new DefinitionDecorator('cartodb_connection_public')
+            )
+                ->setArguments(
+                    array(
+                        $connection['subdomain'],
+                    )
+                );
         }
     }
 }

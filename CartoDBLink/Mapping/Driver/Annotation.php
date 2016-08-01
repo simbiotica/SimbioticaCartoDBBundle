@@ -3,48 +3,48 @@
 namespace Simbiotica\CartoDBBundle\CartoDBLink\Mapping\Driver;
 
 use Gedmo\Exception\InvalidMappingException;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Gedmo\Mapping\Driver\AbstractAnnotationDriver;
-use Doctrine\Common\Annotations\AnnotationReader;
 
 class Annotation extends AbstractAnnotationDriver
 {
-    const CARTODBLINK =  'Simbiotica\\CartoDBBundle\\CartoDBLink\\Mapping\\CartoDBLink';
-    const CARTODBCOLUMN =  'Simbiotica\\CartoDBBundle\\CartoDBLink\\Mapping\\CartoDBColumn';
-    
+    const CARTODBLINK = 'Simbiotica\\CartoDBBundle\\CartoDBLink\\Mapping\\CartoDBLink';
+    const CARTODBCOLUMN = 'Simbiotica\\CartoDBBundle\\CartoDBLink\\Mapping\\CartoDBColumn';
+
     public function readExtendedMetadata($meta, array &$config)
     {
         $class = $this->getMetaReflectionClass($meta);
         // class annotations
-        if ($annot = $this->reader->getClassAnnotation($class, self::CARTODBLINK)) {
-            if (!$annot->connection || !$annot->table) {
-                throw new InvalidMappingException("CartoDBLink requires \"connection\" and \"table\" configurations, found ".$annot);
+        if ($annotation = $this->reader->getClassAnnotation($class, self::CARTODBLINK)) {
+            if (!$annotation->connection || !$annotation->table) {
+                throw new InvalidMappingException(
+                    "CartoDBLink requires \"connection\" and \"table\" configurations, found ".$annotation
+                );
+            } else {
+                $config['connection'] = $annotation->connection;
+                $config['table'] = $annotation->table;
+                $config['cascade'] = $annotation->cascade;
             }
-            else 
-            {
-                $config['connection'] = $annot->connection;
-                $config['table'] = $annot->table;
-                $config['cascade'] = $annot->cascade;
-            }
-            if ($annot->cascade)
-            {
-                if (count(array_diff($annot->cascade, array('fetch', 'persist', 'remove', 'all'))) > 0)
-                {
-                    throw new InvalidMappingException("CartoDBLink: cascade can have \"fetch\", \"persist\", \"remove\" or \"all\", found: ".implode(", ", array_diff($annot->cascade, array('persist', 'remove', 'all'))));
+            if ($annotation->cascade) {
+                if (count(array_diff($annotation->cascade, array('fetch', 'persist', 'remove', 'all'))) > 0) {
+                    throw new InvalidMappingException(
+                        "CartoDBLink: cascade can have \"fetch\", \"persist\", \"remove\" or \"all\", found: ".implode(
+                            ", ",
+                            array_diff($annotation->cascade, array('persist', 'remove', 'all'))
+                        )
+                    );
                 }
             }
-        }
-        else {
+        } else {
             //if no CartoDBLink is found, just quit. This will allow easy commenting of CartoDB Annotations by just commenting the CartoDBLink
             return;
         }
-        
+
         $index = false;
         // property annotations
         foreach ($class->getProperties() as $property) {
             if ($meta->isMappedSuperclass && !$property->isPrivate() ||
-                    $meta->isInheritedField($property->name) ||
-                    isset($meta->associationMappings[$property->name]['inherited'])
+                $meta->isInheritedField($property->name) ||
+                isset($meta->associationMappings[$property->name]['inherited'])
             ) {
                 continue;
             }
@@ -52,20 +52,25 @@ class Annotation extends AbstractAnnotationDriver
             if ($column = $this->reader->getPropertyAnnotation($property, self::CARTODBCOLUMN)) {
                 $field = $property->getName();
                 if (!$column->column) {
-                    throw new InvalidMappingException("CartoDBColumn requires \"column\" configuration, found ".$column);
+                    throw new InvalidMappingException(
+                        "CartoDBColumn requires \"column\" configuration, found ".$column
+                    );
                 }
                 $config['columns'][$field] = $column;
-                if ($column->index)
+                if ($column->index) {
                     $index = true;
+                }
             }
         }
-        
+
         if (!$meta->isMappedSuperclass && $config) {
             if (isset($config['columns']) && !isset($config['connection'])) {
-                throw new InvalidMappingException("Class must be annoted with CartoDBLink annotation in order to link columns from class - {$meta->name}");
+                throw new InvalidMappingException(
+                    "Class must be annotated with CartoDBLink annotation in order to link columns from class - {$meta->name}"
+                );
             }
         }
-        if ($annot && !$index) {
+        if ($annotation && !$index) {
             throw new InvalidMappingException("At least one CartoDBColumn must be used as index - {$meta->name}");
         }
     }

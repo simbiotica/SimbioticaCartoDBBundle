@@ -24,46 +24,44 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->append($this->getAnnotationNode('orm'))
             ->children()
-                ->arrayNode('connections')
-                    ->isRequired()
-                    ->requiresAtLeastOneElement()
-                    ->useAttributeAsKey('name')
-                    ->prototype('array')
-                    ->children()
-                        ->booleanNode('private')->isRequired()->defaultValue(true)->end()
-                        ->scalarNode('subdomain')->isRequired()->end()
-                        ->scalarNode('api_key')->end()
-                        ->scalarNode('consumer_key')->end()
-                        ->scalarNode('consumer_secret')->end()
-                        ->scalarNode('email')->end()
-                        ->scalarNode('password')->end()
-                        
-                    ->end()
-                ->end()
+            ->arrayNode('connections')
+            ->isRequired()
+            ->requiresAtLeastOneElement()
+            ->useAttributeAsKey('name')
+            ->prototype('array')
+            ->children()
+            ->booleanNode('private')->isRequired()->defaultValue(true)->end()
+            ->scalarNode('subdomain')->isRequired()->end()
+            ->scalarNode('api_key')->end()
+            ->scalarNode('consumer_key')->end()
+            ->scalarNode('consumer_secret')->end()
+            ->scalarNode('email')->end()
+            ->scalarNode('password')->end()
             ->end()
-        ;
+            ->end()
+            ->end();
 
         return $treeBuilder;
     }
-    
+
     /**
      * @param string $name
+     * @return ArrayNodeDefinition|\Symfony\Component\Config\Definition\Builder\NodeDefinition
      */
     private function getAnnotationNode($name)
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root($name);
-    
+
         $node
-        ->useAttributeAsKey('id')
+            ->useAttributeAsKey('id')
             ->prototype('array')
             ->performNoDeepMerging()
             ->children()
-                ->booleanNode('cartodblink')->defaultFalse()->end()
+            ->booleanNode('cartodblink')->defaultFalse()->end()
             ->end()
-        ->end()
-        ;
-    
+            ->end();
+
         return $node;
     }
 }

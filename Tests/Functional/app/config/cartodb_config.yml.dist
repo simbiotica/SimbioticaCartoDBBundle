@@ -1,24 +1,24 @@
 # Copy this file as cartodb_config.yml and fill in the parameters
 
 simbiotica_carto_db:
-    connections:
-        private:
-            private: true
-            consumer_key:
-            consumer_secret:
-            subdomain:
-            email:
-            password:
-        public:
-            private: false
-            subdomain:
-        private_fail:
-            private: true
-            consumer_key: foo
-            consumer_secret: foo
-            subdomain: foo
-            email: foo
-            password: foo
-        public_fail:
-            private: false
-            subdomain: foo
+  connections:
+    private:
+      private: true
+      consumer_key:
+      consumer_secret:
+      subdomain:
+      email:
+      password:
+    public:
+      private: false
+      subdomain:
+    private_fail:
+      private: true
+      consumer_key: foo
+      consumer_secret: foo
+      subdomain: foo
+      email: foo
+      password: foo
+    public_fail:
+      private: false
+      subdomain: foo
