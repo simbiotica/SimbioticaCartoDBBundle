@@ -29,6 +29,5 @@
     "psr-4": {
       "Simbiotica\\CartoDBBundle\\": ""
     }
-  },
-  "target-dir": "Simbiotica/CartoDBBundle"
+  }
 }
