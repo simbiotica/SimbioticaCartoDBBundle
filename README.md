@@ -1,7 +1,7 @@
-SimbioticaCartoDBBundle
+SimbioticaCartoBundle
 =======================
 
-CartoDB SQL API integration for Symfony2
+Carto SQL API integration for Symfony2
 
 You can find documentation in Resources/docs folder
 

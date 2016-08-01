@@ -1,6 +1,6 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\CartoDBLink\Mapping;
+namespace Simbiotica\CartoBundle\CartoLink\Mapping;
 
 use Doctrine\Common\Annotations\Annotation;
 
@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target("PROPERTY")
  */
-final class CartoDBColumn extends Annotation
+final class CartoColumn extends Annotation
 {
     public $column; //name of cartodb column
     public $strong = false; //if true, will override local value with cartodb's on load

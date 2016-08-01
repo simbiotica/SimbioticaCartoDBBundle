@@ -1,4 +1,4 @@
-SimbioticaCartoDBBundle
+SimbioticaCartoBundle
 =======================
 
 CartoDB SQL API integration for Symfony2
@@ -49,7 +49,7 @@ Next, enable it in you app/AppKernel.php
   {
       $bundles = array(
           // ...
-          new Simbiotica\CartoDBBundle\SimbioticaCartoDBBundle(),
+          new Simbiotica\CartoBundle\SimbioticaCartoBundle(),
       );
   }
 

@@ -1,5 +1,5 @@
 imports:
-    - { resource: cartodb_config.yml }
+    - { resource: carto_config.yml }
 
 framework:
     secret:          $3cr3t

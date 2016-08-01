@@ -1,7 +1,7 @@
 Configuration
 =============
 
-SimbioticaCartoDBBundle supports multiple connections to CartoDB, for both public and private tables
+SimbioticaCartoBundle supports multiple connections to CartoDB, for both public and private tables
 
 .. code-block:: yaml
 

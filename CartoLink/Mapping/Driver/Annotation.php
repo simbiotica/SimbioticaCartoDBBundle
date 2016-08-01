@@ -1,20 +1,20 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\CartoDBLink\Mapping\Driver;
+namespace Simbiotica\CartoBundle\CartoLink\Mapping\Driver;
 
 use Gedmo\Exception\InvalidMappingException;
 use Gedmo\Mapping\Driver\AbstractAnnotationDriver;
 
 class Annotation extends AbstractAnnotationDriver
 {
-    const CARTODBLINK = 'Simbiotica\\CartoDBBundle\\CartoDBLink\\Mapping\\CartoDBLink';
-    const CARTODBCOLUMN = 'Simbiotica\\CartoDBBundle\\CartoDBLink\\Mapping\\CartoDBColumn';
+    const CARTOLINK = 'Simbiotica\\CartoBundle\\CartoLink\\Mapping\\CartoLink';
+    const CARTOCOLUMN = 'Simbiotica\\CartoBundle\\CartoLink\\Mapping\\CartoColumn';
 
     public function readExtendedMetadata($meta, array &$config)
     {
         $class = $this->getMetaReflectionClass($meta);
         // class annotations
-        if ($annotation = $this->reader->getClassAnnotation($class, self::CARTODBLINK)) {
+        if ($annotation = $this->reader->getClassAnnotation($class, self::CARTOLINK)) {
             if (!$annotation->connection || !$annotation->table) {
                 throw new InvalidMappingException(
                     "CartoDBLink requires \"connection\" and \"table\" configurations, found ".$annotation
@@ -49,7 +49,7 @@ class Annotation extends AbstractAnnotationDriver
                 continue;
             }
             // linked property
-            if ($column = $this->reader->getPropertyAnnotation($property, self::CARTODBCOLUMN)) {
+            if ($column = $this->reader->getPropertyAnnotation($property, self::CARTOCOLUMN)) {
                 $field = $property->getName();
                 if (!$column->column) {
                     throw new InvalidMappingException(

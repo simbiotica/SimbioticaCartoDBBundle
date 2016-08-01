@@ -1,6 +1,6 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\DependencyInjection;
+namespace Simbiotica\CartoBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -19,7 +19,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('simbiotica_carto_db');
+        $rootNode = $treeBuilder->root('simbiotica_carto');
 
         $rootNode
             ->append($this->getAnnotationNode('orm'))
@@ -58,7 +58,7 @@ class Configuration implements ConfigurationInterface
             ->prototype('array')
             ->performNoDeepMerging()
             ->children()
-            ->booleanNode('cartodblink')->defaultFalse()->end()
+            ->booleanNode('cartolink')->defaultFalse()->end()
             ->end()
             ->end();
 

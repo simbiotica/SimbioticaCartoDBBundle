@@ -12,7 +12,7 @@ class AppKernel extends Kernel
     {
         return array(
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new Simbiotica\CartoDBBundle\SimbioticaCartoDBBundle(),
+            new Simbiotica\CartoBundle\SimbioticaCartoBundle(),
         );
     }
 
@@ -29,7 +29,7 @@ class AppKernel extends Kernel
      */
     public function getCacheDir()
     {
-        return sys_get_temp_dir().'/SimbioticaCartoDBBundle/cache';
+        return sys_get_temp_dir().'/SimbioticaCartoBundle/cache';
     }
 
     /**
@@ -37,7 +37,7 @@ class AppKernel extends Kernel
      */
     public function getLogDir()
     {
-        return sys_get_temp_dir().'/SimbioticaCartoDBBundle/logs';
+        return sys_get_temp_dir().'/SimbioticaCartoBundle/logs';
     }
 }
 

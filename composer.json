@@ -1,11 +1,11 @@
 {
   "name": "simbiotica/cartodb-bundle",
   "type": "symfony-bundle",
-  "description": "CartoDB SQL API integration for Symfony2",
+  "description": "Carto SQL API integration for Symfony2",
   "keywords": [
     "cartodb"
   ],
-  "homepage": "http://github.com/simbiotica/SimbioticaCartoDBBundle",
+  "homepage": "http://github.com/simbiotica/SimbioticaCartoBundle",
   "license": "MIT",
   "authors": [
     {
@@ -27,7 +27,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Simbiotica\\CartoDBBundle\\": ""
+      "Simbiotica\\CartoBundle\\": ""
     }
   }
 }

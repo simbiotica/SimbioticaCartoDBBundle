@@ -1,6 +1,6 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\CartoDBLink\Mapping;
+namespace Simbiotica\CartoBundle\CartoLink\Mapping;
 
 use Doctrine\Common\Annotations\Annotation;
 
@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target("CLASS")
  */
-final class CartoDBLink extends Annotation
+final class CartoLink extends Annotation
 {
     public $connection; //name of the connection to use
     public $table; //name of the table it links to

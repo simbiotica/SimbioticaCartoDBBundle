@@ -31,7 +31,7 @@ in your classes:
    namespace Simbiotica\AcmeBundle\Entity;
    
    use Doctrine\ORM\Mapping as ORM;
-   use Simbiotica\CartoDBBundle\CartoDBLink\Mapping as CartoDB;
+   use Simbiotica\CartoBundle\CartoDBLink\Mapping as CartoDB;
    
    /**
     * @ORM\Entity

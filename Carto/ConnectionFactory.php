@@ -4,7 +4,7 @@
  * @author tiagojsag
  */
 
-namespace Simbiotica\CartoDBBundle\CartoDB;
+namespace Simbiotica\CartoBundle\Carto;
 
 use Simbiotica\CartoDBClient\PublicConnection;
 use Simbiotica\CartoDBClient\PrivateConnection;

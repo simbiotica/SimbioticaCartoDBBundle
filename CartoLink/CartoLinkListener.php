@@ -1,13 +1,13 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\CartoDBLink;
+namespace Simbiotica\CartoBundle\CartoLink;
 
 use Gedmo\Tool\Wrapper\AbstractWrapper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\Common\EventArgs;
 use Gedmo\Mapping\MappedEventSubscriber;
 
-class CartoDBLinkListener extends MappedEventSubscriber
+class CartoLinkListener extends MappedEventSubscriber
 {
     protected $container;
 

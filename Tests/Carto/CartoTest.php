@@ -1,6 +1,6 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\Tests\CartoDB;
+namespace Simbiotica\CartoBundle\Tests\Carto;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -20,11 +20,11 @@ class CalculatorTest extends WebTestCase
         $container = $client->getContainer();
 
         //wrong config fails auth
-        $privateFailClient = $container->get('simbiotica.cartodb_connection.private_fail');
+        $privateFailClient = $container->get('simbiotica.carto_connection.private_fail');
         $this->assertFalse($privateFailClient->authorized, 'Wrong credentials should make auth fail');
 
         //correct config passes auth
-        $privateClient = $container->get('simbiotica.cartodb_connection.private');
+        $privateClient = $container->get('simbiotica.carto_connection.private');
         $this->assertTrue($privateClient->authorized, 'Correct credentials should make auth succeed');
 
         /**
@@ -206,7 +206,7 @@ class CalculatorTest extends WebTestCase
         $client = static::createClient();
         $container = $client->getContainer();
 
-        $publicClient = $container->get('simbiotica.cartodb_connection.public');
+        $publicClient = $container->get('simbiotica.carto_connection.public');
         $this->assertTrue(
             $publicClient->authorized,
             'Connection to public tables should succeed if parameters are correct'

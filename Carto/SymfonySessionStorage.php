@@ -1,6 +1,6 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\CartoDB;
+namespace Simbiotica\CartoBundle\Carto;
 
 use Simbiotica\CartoDBClient\TokenStorageInterface;
 use Eher\OAuth\Token;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Simbiotica\CartoDBBundle\DependencyInjection;
+namespace Simbiotica\CartoBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
  */
-class SimbioticaCartoDBExtension extends Extension
+class SimbioticaCartoExtension extends Extension
 {
     /**
      * {@inheritDoc}
@@ -28,7 +28,7 @@ class SimbioticaCartoDBExtension extends Extension
 
         foreach ($config['orm'] as $name => $listeners) {
             foreach ($listeners as $ext => $enabled) {
-                $listener = sprintf('cartodb.listener.%s', $ext);
+                $listener = sprintf('carto.listener.%s', $ext);
                 if ($enabled && $container->hasDefinition($listener)) {
                     $attributes = array('connection' => $name);
                     $definition = $container->getDefinition($listener);
@@ -59,8 +59,8 @@ class SimbioticaCartoDBExtension extends Extension
     {
         if ($connection['private']) {
             $container->setDefinition(
-                sprintf('simbiotica.cartodb_connection.%s', $name),
-                new DefinitionDecorator('cartodb_connection_private')
+                sprintf('simbiotica.carto_connection.%s', $name),
+                new DefinitionDecorator('carto_connection_private')
             )
                 ->setArguments(
                     array(
@@ -74,8 +74,8 @@ class SimbioticaCartoDBExtension extends Extension
                 );
         } else {
             $container->setDefinition(
-                sprintf('simbiotica.cartodb_connection.%s', $name),
-                new DefinitionDecorator('cartodb_connection_public')
+                sprintf('simbiotica.carto_connection.%s', $name),
+                new DefinitionDecorator('carto_connection_public')
             )
                 ->setArguments(
                     array(

@@ -1,7 +1,7 @@
 build
 phpunit.xml
 Resources/doc/_build/*
-Tests/Functional/app/config/cartodb_config.yml
+Tests/Functional/app/config/carto_config.yml
 composer.lock
 vendor
 composer.phar
