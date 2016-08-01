@@ -17,19 +17,19 @@
             <directory>./Tests</directory>
         </testsuite>
     </testsuites>
-    
+
     <php>
-      <server name="KERNEL_DIR" value="./Tests/Functional/app" />
+        <server name="KERNEL_DIR" value="./Tests/Functional/app"/>
     </php>
-  
-  <filter>
-    <whitelist>
-      <directory>./</directory>
-      <exclude>
-        <directory>./Resources</directory>
-        <directory>./Tests</directory>
-        <directory>./vendor</directory>
-      </exclude>
-    </whitelist>
-  </filter>
+
+    <filter>
+        <whitelist>
+            <directory>./</directory>
+            <exclude>
+                <directory>./Resources</directory>
+                <directory>./Tests</directory>
+                <directory>./vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
 </phpunit>

@@ -8,8 +8,7 @@
         <parameter key="carto_connection_private.class">Simbiotica\CartoBundle\Carto\PrivateConnection</parameter>
         <parameter key="carto_connection_public.class">Simbiotica\CartoBundle\Carto\PublicConnection</parameter>
         <parameter key="carto_connection_factory.class">Simbiotica\CartoBundle\Carto\ConnectionFactory</parameter>
-        <parameter key="carto.listener.cartolink.class">Simbiotica\CartoBundle\CartoLink\CartoLinkListener
-        </parameter>
+        <parameter key="carto.listener.cartolink.class">Simbiotica\CartoBundle\CartoLink\CartoLinkListener</parameter>
     </parameters>
 
     <services>
